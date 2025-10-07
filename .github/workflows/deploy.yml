@@ -1,4 +1,4 @@
-name: Deploy to Railway
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -6,10 +6,18 @@ on:
       - main
   workflow_dispatch:  # Permite ejecución manual
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,8 +35,18 @@ jobs:
         run: |
           mkdocs build
 
-      - name: Deploy to Railway
-        uses: bervProject/railway-deploy@main
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          service: gdi-docs
+          path: ./site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
