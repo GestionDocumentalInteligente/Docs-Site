@@ -1,0 +1,98 @@
+/* Custom CSS para GDI Docs - Tema Azul Marino */
+
+:root {
+  /* Colores principales - Azul Marino */
+  --md-primary-fg-color: #001f3f;
+  --md-primary-fg-color--light: #003366;
+  --md-primary-fg-color--dark: #001229;
+
+  /* Acento - Azul brillante */
+  --md-accent-fg-color: #0074D9;
+  --md-accent-fg-color--transparent: rgba(0, 116, 217, 0.1);
+}
+
+/* Modo oscuro */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #1a4d7a;
+  --md-primary-fg-color--light: #2563a8;
+  --md-primary-fg-color--dark: #0d2942;
+}
+
+/* Mejoras visuales para cards en la página principal */
+.md-typeset .grid.cards > ol > li,
+.md-typeset .grid.cards > ul > li {
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.md-typeset .grid.cards > ol > li:hover,
+.md-typeset .grid.cards > ul > li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.15);
+}
+
+/* Estilo para botones */
+.md-button {
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.md-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 116, 217, 0.3);
+}
+
+.md-button--primary {
+  background-color: var(--md-primary-fg-color);
+}
+
+.md-button--primary:hover {
+  background-color: var(--md-primary-fg-color--light);
+}
+
+/* Mejoras para admonitions */
+.md-typeset .admonition {
+  border-radius: 6px;
+}
+
+/* Mejoras para tablas */
+.md-typeset table:not([class]) {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-primary-fg-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* Código */
+.md-typeset code {
+  border-radius: 4px;
+}
+
+/* Header personalizado */
+.md-header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Navegación lateral */
+.md-sidebar {
+  border-radius: 0;
+}
+
+.md-nav__link--active {
+  font-weight: 600;
+  color: var(--md-accent-fg-color);
+}
+
+/* Search bar */
+.md-search__input {
+  border-radius: 20px;
+}
+
+/* Footer */
+.md-footer {
+  background-color: var(--md-primary-fg-color--dark);
+}

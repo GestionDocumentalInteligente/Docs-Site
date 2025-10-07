@@ -1,0 +1,155 @@
+site_name: GDI Docs
+site_description: Documentación oficial del Framework GDI - Gestión Documental Inteligente
+site_author: GDI Latam
+site_url: https://gdi-docs.up.railway.app
+
+repo_name: GestionDocumentalInteligente/Docs
+repo_url: https://github.com/GestionDocumentalInteligente/Docs
+edit_uri: edit/main/Docs/
+
+theme:
+  name: material
+  language: es
+  logo: assets/logo.png
+  favicon: assets/favicon.png
+
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Cambiar a modo oscuro
+
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar a modo claro
+
+  features:
+    - navigation.instant       # Navegación instantánea sin recargar
+    - navigation.tracking      # URL actualizada automáticamente
+    - navigation.tabs          # Pestañas de navegación principal
+    - navigation.sections      # Secciones en el sidebar
+    - navigation.expand        # Expandir secciones automáticamente
+    - navigation.top           # Botón "volver arriba"
+    - navigation.footer        # Navegación en footer
+    - search.suggest           # Sugerencias de búsqueda
+    - search.highlight         # Resaltar términos buscados
+    - search.share             # Compartir búsquedas
+    - content.code.copy        # Copiar código con un click
+    - content.code.annotate    # Anotaciones en código
+    - toc.follow               # TOC sigue scroll
+    - toc.integrate            # TOC integrado en navegación
+
+plugins:
+  - search:
+      lang: es
+  - glightbox  # Lightbox para imágenes
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+      title: En esta página
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/GestionDocumentalInteligente
+      name: GDI en GitHub
+
+  generator: false  # Remover "Made with Material for MkDocs"
+
+extra_css:
+  - stylesheets/extra.css
+
+# Navegación
+nav:
+  - Inicio: index.md
+  - Introducción y Visión:
+      - Visión General: introduccion-vision/vision-general.md
+      - Contexto y Antecedentes: introduccion-vision/contexto-antecedentes.md
+      - Arquitectura de la Solución: introduccion-vision/arquitectura-solucion-gdi.md
+
+  - Documentos:
+      - Introducción y Casos de Uso: documentos/introduccion-casos-uso.md
+      - Flujo de Creación: documentos/flujo-creacion.md
+      - Estados y Transiciones: documentos/estados-transiciones.md
+      - Sistema de Numeración: documentos/sistema-num.md
+      - Acceso y Permisos: documentos/acceso-permisos.md
+      - Validaciones y Excepciones: documentos/validaciones-excepciones.md
+      - Consideraciones de Seguridad: documentos/consideraciones-seguridad.md
+      - Modelo de Datos: documentos/modelo-datos-docs.md
+
+  - Expedientes:
+      - Casos de Uso: expedientes/casos-uso.md
+      - Flujo de Creación: expedientes/flujo-creacion.md
+      - Gestión Operativa y Secciones: expedientes/gestion-operativa-secciones.md
+      - Nomenclatura: expedientes/nomenclatura-exp.md
+      - Panel de Navegación: expedientes/panel-navegacion.md
+      - Acceso y Permisos: expedientes/acceso-permisos.md
+      - Componentes Técnicos: expedientes/componentes-tecnicos.md
+      - Integración con Documentos: expedientes/integracion-documentos.md
+      - Consideraciones de Seguridad: expedientes/consideraciones-seguridad.md
+      - Modelo de Datos: expedientes/modelo-datos-exp.md
+
+  - Organigrama:
+      - Introducción y Casos de Uso: organigrama/intro-caso-uso.md
+      - Estructura Organizacional: organigrama/estructura-org.md
+      - Flujos de Gestión: organigrama/flujos-gestion.md
+      - Roles y Permisos: organigrama/roles-permisos.md
+      - Modelo de Datos: organigrama/modelo-datos.md
+      - Sistema de Sellos: organigrama/sistema-de-sellos.md
+
+  - Backoffice:
+      - Introducción y Acceso: backoffice/introduccion-acceso.md
+      - Estructura y Secciones: backoffice/estructura-secciones.md
+      - Flujos de Configuración: backoffice/flujos-configuracion.md
+      - Información General: backoffice/info-general.md
+      - Type Definition (Documentos): backoffice/type-definition-doc.md
+      - Type Definition (Expedientes): backoffice/type-definition-exp.md
+      - Organigrama: backoffice/organigrama.md
+      - Control de Acceso: backoffice/access-control.md
+      - Integraciones: backoffice/integraciones.md
+      - API Keys: backoffice/api-key.md
+
+  - Base de Datos:
+      - Introducción: database/readme.md
+      - Configuración y Media: database/configuracion-y-media.md
+      - Documentos: database/documentos.md
+      - Organigrama: database/organigrama.md
+      - Plantillas: database/plantillas.md
+      - Roles y Permisos: database/roles-y-permisos.md
+      - Expedientes - Tablas: database/expediente-tables.md
+      - Expedientes - Movimientos: database/expediente-movements.md
+
+  - Glosario: glosario.md
+
+copyright: Copyright &copy; 2025 GDI Latam - Gestión Documental Inteligente
