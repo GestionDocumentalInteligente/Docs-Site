@@ -35,8 +35,6 @@ Para entender mejor el ciclo de vida de un documento, estos son algunos de los c
 
 *   **`document_draft.status`**: Representa la etapa exacta del ciclo de vida del documento (`Borrador`, `Enviado a Firmar`, `Firmado`, etc.) y es lo que determina qué acciones puede o no puede hacer un usuario en la pantalla.
 
-*   **`document_draft.pad_id`**: Es el identificador técnico que permite que varios usuarios editen el mismo documento a la vez en tiempo real. Es el corazón de la funcionalidad colaborativa.
-
 *   **`document_signers.is_numerator`**: Este campo booleano (`true`/`false`) es crucial porque marca al firmante que tiene la responsabilidad final de oficializar el documento y asignarle un número. No es un firmante más, es quien cierra el proceso.
 
 *   **La diferencia entre `created_by` y `sent_by`**: Es importante distinguirlos para la auditoría. `created_by` es el autor intelectual del borrador, mientras que `sent_by` es el usuario que toma la responsabilidad de iniciar formalmente el circuito de firmas (pueden ser personas distintas).
@@ -65,25 +63,6 @@ Para entender mejor el ciclo de vida de un documento, estos son algunos de los c
 | **`cancelled`** | Cancelado antes de completar | Solo consulta histórica |
 | **`archived`** | Archivado post-finalización | Solo consulta, no modificable |
 
-
-
-## 👥 Editor Colaborativo
-
-### Concepto de `pad_id`
-
-Cada documento recibe un **identificador único de pad colaborativo** que permite:
-
-- **✏️ Edición simultánea** de múltiples usuarios
-- **🔄 Sincronización en tiempo real** de cambios
-- **📝 Historial de versiones** durante la edición
-- **👀 Indicadores de presencia** de editores activos
-
-### Flujo de Colaboración
-
-1. **Creación**: Usuario crea documento → se asigna `pad_id` único
-2. **Invitación**: Otros usuarios acceden via permisos del department
-3. **Edición**: Cambios se sincronizan automáticamente
-4. **Finalización**: Al enviar a firma, se congela el contenido
 
 
 ## ❌ Gestión de Rechazos y Correcciones
@@ -119,9 +98,8 @@ CREATE TABLE public.document_rejections (
 **Flujo**:
 1. Selecciona tipo de documento para su confección
 2. Define referencia/motivo del documento
-3. Sistema asigna `pad_id` para colaboración
-4. Invita colegas para edición colaborativa
-5. Finaliza contenido y configura firmantes
+3. Edita el contenido con el editor de texto enriquecido
+4. Finaliza contenido y configura firmantes
 
 **Resultado**: Documento en estado `draft` listo para firma
 

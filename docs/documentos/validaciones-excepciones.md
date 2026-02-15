@@ -19,18 +19,15 @@ Las validaciones de entrada son la primera línea de defensa para garantizar la 
 - **Firmantes**: Al menos un firmante debe estar asignado.
 - **Numerador**: Debe estar definido antes de iniciar el circuito. Solo puede haber un numerador por documento.
 - **Contenido**: Contenido estructurado obligatorio (HTML válido y bien formado). No puede estar vacío.
-- **ID Editor Colaborativo (`pad_id`)**: Requerido para la edición colaborativa.
-
 **Implementación Técnica:**
 
 ```sql
 -- Validaciones críticas implementadas en la tabla `document_draft`
 document_id         UUID NOT NULL DEFAULT gen_random_uuid()
-document_type_id    UUID NOT NULL  -- Debe referenciar document_types válido
+document_type_id    INT NOT NULL   -- Debe referenciar document_types válido
 created_by          UUID NOT NULL  -- Usuario debe existir en users
 reference           TEXT NOT NULL  -- Nunca vacío (motivo/referencia)
 content             JSONB NOT NULL -- Contenido estructurado obligatorio
-pad_id              VARCHAR(255) NOT NULL -- ID editor colaborativo
 ```
 
 #### Formato

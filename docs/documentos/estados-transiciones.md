@@ -72,7 +72,6 @@ Documento en proceso de creación y edición colaborativa. El contenido es modif
 ### Características
 - ✅ **Contenido editable** via editor colaborativo
 - ✅ **Configuración de firmantes** permitida
-- ✅ **Múltiples editores** simultáneos (pad_id)
 - ✅ **Guardado automático** cada 30 segundos
 - ❌ **Sin validez legal** hasta firmarse
 
@@ -82,7 +81,6 @@ Documento en proceso de creación y edición colaborativa. El contenido es modif
 status = 'draft'
 
 -- Metadatos de edición
-pad_id VARCHAR NOT NULL,           -- ID del editor colaborativo
 created_by UUID NOT NULL,          -- Usuario creador
 created_at TIMESTAMP DEFAULT NOW(),
 last_modified_at TIMESTAMP DEFAULT NOW(),
@@ -100,7 +98,6 @@ is_deleted BOOLEAN DEFAULT false  -- Eliminación lógica
 -- Validaciones obligatorias
 CHECK (reference IS NOT NULL AND reference != ''),
 CHECK (content IS NOT NULL AND content != '{}'),
-CHECK (pad_id IS NOT NULL AND pad_id != '')
 ```
 
 ### Transiciones Permitidas DESDE `draft`

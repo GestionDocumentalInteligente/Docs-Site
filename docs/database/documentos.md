@@ -21,7 +21,6 @@ Este documento detalla la estructura de las tablas principales que componen el m
 | `is_deleted` | `boolean` | Marca para borrado logico (soft delete). |
 | `audit_data` | `jsonb` | Metadatos de auditoria (quien creo, modifico, etc.). |
 | `sent_by` | `uuid` | **FK** - Usuario que envio el documento a firmar (`users`). |
-| `pad_id` | `varchar(255)` | Identificador para la sesion de edicion colaborativa. |
 | `resume` | `text` | Resumen libre del documento. |
 
 ```sql
@@ -37,7 +36,6 @@ CREATE TABLE document_draft (
     is_deleted BOOLEAN DEFAULT false,
     audit_data JSONB,
     sent_by UUID,
-    pad_id VARCHAR(255) NOT NULL,
     resume TEXT,
     CONSTRAINT documents_pkey PRIMARY KEY (id)
 );

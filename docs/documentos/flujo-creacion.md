@@ -86,15 +86,13 @@ INSERT INTO document_draft (
     created_by,
     reference,
     content,
-    status,
-    pad_id
+    status
 ) VALUES (
     ?, -- tipo seleccionado
     ?, -- usuario actual
     ?, -- referencia ingresada
     '{}', -- contenido JSON vacío
-    'draft',
-    ? -- pad_id único generado
+    'draft'
 );
 ```
 
@@ -109,12 +107,6 @@ INSERT INTO document_draft (
 ![Pantalla Edición Documento](../assets/images/docs/editor-modal-documento.png)
 
 ### 2.2 Editor Colaborativo en Tiempo Real
-
-**Concepto `pad_id`**:
-- Identificador único para sesión colaborativa
-- Permite edición simultánea de múltiples usuarios
-- Sincronización automática de cambios
-- Historial de versiones durante edición
 
 #### Funcionalidades del Editor
 
@@ -514,7 +506,7 @@ sequenceDiagram
     U->>S: Crear Documento
     S->>DB: INSERT document_draft (draft)
     U->>S: Edición Colaborativa
-    S->>DB: UPDATE content (pad_id)
+    S->>DB: UPDATE content
     U->>S: Configurar Firmantes
     S->>DB: INSERT document_signers
     U->>S: Enviar a Firma

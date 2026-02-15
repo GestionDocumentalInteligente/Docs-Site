@@ -22,7 +22,6 @@ CREATE TABLE document_draft (
     is_deleted BOOLEAN DEFAULT false,
     audit_data JSONB,               -- Ver Estructura Detallada en la Sección 8.2
     sent_by UUID,
-    pad_id VARCHAR NOT NULL
 );
 ```
 
@@ -32,7 +31,6 @@ CREATE TABLE document_draft (
 - `reference`: Motivo o referencia del documento (nunca vacío)
 - `content`: Contenido enriquecido en formato JSON
 - `status`: Estado actual del documento (ver enum más abajo)
-- `pad_id`: ID del editor colaborativo
 - `sent_by`: Usuario que envió el documento a firmar
 - `is_deleted`: Eliminación lógica para preservar integridad
 
@@ -365,8 +363,8 @@ numeration_requests ──→ official_documents
 ### 1. Creación:
 ```sql
 INSERT INTO document_draft (
-    document_type_id, created_by, reference, 
-    content, pad_id, status
+    document_type_id, created_by, reference,
+    content, status
 ) VALUES (...);
 ```
 
