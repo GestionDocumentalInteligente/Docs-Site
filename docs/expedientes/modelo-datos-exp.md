@@ -1,4 +1,4 @@
-## 3.3 Modelo de Datos del Flujo de Creación
+# Modelo de Datos del Modulo Expedientes
 
 ### Conceptos Fundamentales
 
@@ -9,11 +9,7 @@ El flujo de creación de expedientes involucra múltiples entidades que trabajan
 - **Relaciones organizacionales** que determinan permisos y responsabilidades
 - **Un historial de auditoría** que registra cada paso del proceso
 
-### Flujo de Datos durante la Creación
-
-## Flujo de Datos durante la Creación
-
-## Flujo de Datos durante la Creación
+### Flujo de Datos durante la Creacion
 
 [Usuario] → [Validación] → [Expediente] → [Numeración] → [Carátula] → [Vinculación]  
     ↓                ↓                ↓               ↓              ↓              ↓  

@@ -1,25 +1,25 @@
-# Modelo de Datos: Módulo de Organigrama
+# Modelo de Datos: Modulo de Organigrama
 
-Este documento detalla la estructura de las tablas principales que componen el módulo de Organigrama en GDI, responsable de la gestión de la estructura municipal, usuarios y jerarquías.
+Este documento detalla la estructura de las tablas principales que componen el modulo de Organigrama en GDI, responsable de la gestion de la estructura municipal, usuarios y jerarquias.
 
 ---
 
 ## Tabla: `municipalities`
 
-**Propósito:** Almacena la información de cada municipio o entidad que utiliza la plataforma. Es el nivel más alto de la jerarquía.
+**Proposito:** Almacena la informacion de cada municipio o entidad que utiliza la plataforma. Es el nivel mas alto de la jerarquia. Vive en el schema `public`.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `id_municipality` | `uuid` | **PK** - Identificador único del municipio. |
+| `id_municipality` | `uuid` | **PK** - Identificador unico del municipio. |
 | `name` | `varchar` | Nombre oficial del municipio. |
-| `country` | `country_enum` | País al que pertenece (AR, BR, UY, CL). |
-| `acronym` | `varchar` | Sigla única para el municipio (ej. "TNV"). |
+| `country` | `country_enum` | Pais al que pertenece (AR, BR, UY, CL). |
+| `acronym` | `varchar` | Sigla unica para el municipio (ej. "TNV"). |
 | `schema_name` | `varchar` | Nombre del esquema de base de datos asignado. |
 | `tax_identifier` | `varchar` | Identificador fiscal del municipio (CUIT/RUC). |
-| `is_active` | `boolean` | `true` si el municipio está activo en la plataforma. |
-| `created_at` | `timestamp` | Fecha de creación del registro. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
-| `created_by` | `uuid` | **FK** - Usuario que registró el municipio. |
+| `is_active` | `boolean` | `true` si el municipio esta activo en la plataforma. |
+| `created_at` | `timestamp` | Fecha de creacion del registro. |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
+| `created_by` | `uuid` | **FK** - Usuario que registro el municipio. |
 
 ```sql
 CREATE TABLE public.municipalities (
@@ -40,24 +40,25 @@ CREATE TABLE public.municipalities (
 
 ## Tabla: `departments`
 
-**Propósito:** Define las reparticiones, secretarías o direcciones que componen la estructura principal del municipio.
+**Proposito:** Define las reparticiones, secretarias o direcciones que componen la estructura principal del municipio. Cada reparticion puede tener un titular (`head_user_id`) asignado.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `department_id` | `uuid` | **PK** - Identificador único de la repartición. |
-| `name` | `varchar` | Nombre completo de la repartición. |
-| `acronym` | `varchar` | Sigla única de la repartición. |
-| `parent_jurisdiction_id` | `uuid` | **FK** - ID de la repartición padre para crear jerarquías. |
-| `rank_id` | `uuid` | **FK** - Nivel jerárquico o rango (`ranks`). |
-| `head_user_id` | `uuid` | **FK** - Usuario titular o responsable de la repartición (`users`). |
-| `is_active` | `boolean` | `true` si la repartición está operativa. |
+| `department_id` | `uuid` | **PK** - Identificador unico de la reparticion. |
+| `name` | `varchar` | Nombre completo de la reparticion. |
+| `acronym` | `varchar` | Sigla unica de la reparticion. |
+| `parent_jurisdiction_id` | `uuid` | **FK** - ID de la reparticion padre para crear jerarquias. |
+| `rank_id` | `uuid` | **FK** - Nivel jerarquico o rango (`ranks`). |
+| `head_user_id` | `uuid` | **FK** - Usuario titular o responsable de la reparticion (`users`). |
+| `is_active` | `boolean` | `true` si la reparticion esta operativa. |
 | `start_date` | `timestamp` | Fecha de inicio de actividades. |
 | `end_date` | `timestamp` | Fecha de cese de actividades. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `primary_color` | `varchar(7)` | Color visual asociado (formato hex, ej. "#3A3A9A"). |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 | `municipality_id` | `uuid` | **FK** - Municipio al que pertenece (`municipalities`). |
 
 ```sql
-CREATE TABLE public.departments (
+CREATE TABLE departments (
     department_id uuid NOT NULL,
     name character varying(100) NOT NULL,
     acronym character varying(20),
@@ -67,8 +68,11 @@ CREATE TABLE public.departments (
     is_active boolean DEFAULT true NOT NULL,
     start_date timestamp without time zone DEFAULT CURRENT_DATE NOT NULL,
     end_date timestamp without time zone,
+    primary_color varchar(7),
     audit_data jsonb,
-    municipality_id uuid
+    municipality_id uuid,
+    CONSTRAINT departments_pkey PRIMARY KEY (department_id),
+    CONSTRAINT departments_rank_fkey FOREIGN KEY (rank_id) REFERENCES ranks(rank_id)
 );
 ```
 
@@ -76,27 +80,30 @@ CREATE TABLE public.departments (
 
 ## Tabla: `sectors`
 
-**Propósito:** Representa las subdivisiones o equipos de trabajo dentro de una repartición.
+**Proposito:** Representa las subdivisiones o equipos de trabajo dentro de una reparticion.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `sector_id` | `uuid` | **PK** - Identificador único del sector. |
-| `department_id` | `uuid` | **FK** - Repartición a la que pertenece el sector (`departments`). |
-| `acronym` | `varchar` | Sigla única del sector dentro de su repartición. |
-| `is_active` | `boolean` | `true` si el sector está operativo. |
+| `sector_id` | `uuid` | **PK** - Identificador unico del sector. |
+| `department_id` | `uuid` | **FK** - Reparticion a la que pertenece el sector (`departments`). |
+| `acronym` | `varchar` | Sigla unica del sector dentro de su reparticion. |
+| `is_active` | `boolean` | `true` si el sector esta operativo. |
 | `start_date` | `timestamp` | Fecha de inicio de actividades. |
 | `end_date` | `timestamp` | Fecha de cese de actividades. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `primary_color` | `varchar(7)` | Color visual asociado (formato hex). |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
-CREATE TABLE public.sectors (
+CREATE TABLE sectors (
     sector_id uuid NOT NULL,
     department_id uuid NOT NULL,
     acronym character varying(50) NOT NULL,
     is_active boolean DEFAULT true NOT NULL,
     start_date timestamp without time zone NOT NULL,
     end_date timestamp without time zone,
-    audit_data jsonb
+    primary_color varchar(7),
+    audit_data jsonb,
+    CONSTRAINT sectors_pkey PRIMARY KEY (sector_id)
 );
 ```
 
@@ -104,26 +111,26 @@ CREATE TABLE public.sectors (
 
 ## Tabla: `users`
 
-**Propósito:** Almacena la información de todos los usuarios del sistema, vinculándolos a la estructura organizacional y al sistema de autenticación.
+**Proposito:** Almacena la informacion de todos los usuarios del sistema, vinculandolos a la estructura organizacional y al sistema de autenticacion.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `user_id` | `uuid` | **PK** - Identificador único del usuario en la aplicación. |
-| `auth_id` | `varchar` | ID del usuario en el sistema de autenticación (Supabase Auth). |
+| `user_id` | `uuid` | **PK** - Identificador unico del usuario en la aplicacion. |
+| `auth_id` | `varchar` | ID del usuario en el sistema de autenticacion (Supabase Auth). |
 | `full_name` | `varchar` | Nombre completo del usuario. |
-| `email` | `varchar` | Correo electrónico único del usuario. |
+| `email` | `varchar` | Correo electronico unico del usuario. |
 | `cuit` | `varchar` | CUIT/CUIL del usuario. |
 | `profile_picture_id` | `uuid` | **FK** - Referencia a la imagen de perfil (`media_files`). |
 | `sector_id` | `uuid` | **FK** - Sector principal al que pertenece el usuario (`sectors`). |
 | `is_active` | `boolean` | `true` si el usuario puede acceder al sistema. |
-| `last_access` | `timestamp` | Fecha y hora del último acceso. |
-| `created_at` | `timestamp` | Fecha de creación del usuario. |
-| `identity_check` | `jsonb` | Datos de verificación de identidad (RENAPER, etc.). |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `last_access` | `timestamp` | Fecha y hora del ultimo acceso. |
+| `created_at` | `timestamp` | Fecha de creacion del usuario. |
+| `identity_check` | `jsonb` | Datos de verificacion de identidad (RENAPER, etc.). |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 | `default_seal_id` | `bigint` | ID del sello por defecto para las firmas del usuario. |
 
 ```sql
-CREATE TABLE public.users (
+CREATE TABLE users (
     user_id uuid NOT NULL,
     auth_id character varying(100) NOT NULL,
     full_name character varying(100) NOT NULL,
@@ -136,7 +143,8 @@ CREATE TABLE public.users (
     created_at timestamp without time zone DEFAULT now() NOT NULL,
     identity_check jsonb,
     audit_data jsonb,
-    default_seal_id bigint
+    default_seal_id bigint,
+    CONSTRAINT users_pkey PRIMARY KEY (user_id)
 );
 ```
 
@@ -144,20 +152,44 @@ CREATE TABLE public.users (
 
 ## Tabla: `ranks`
 
-**Propósito:** Define los niveles jerárquicos o rangos funcionales (ej. Intendente, Secretario, Director) para asignarlos a las reparticiones y controlar permisos.
+**Proposito:** Define los niveles jerarquicos o rangos funcionales (ej. Intendente, Secretario, Director) para asignarlos a las reparticiones. Esta tabla es per-tenant (vive en el schema del municipio).
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `rank_id` | `uuid` | **PK** - Identificador único del rango. |
-| `rank_name` | `varchar` | Nombre del rango (ej. "Secretaría"). |
-| `head_signature` | `varchar` | Cargo que aparecerá en la firma (ej. "Secretario"). |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `rank_id` | `uuid` | **PK** - Identificador unico del rango. |
+| `name` | `varchar` | Nombre del rango (ej. "Secretaria"). |
+| `level` | `integer` | Nivel jerarquico numerico (menor = mas alto). |
+| `head_signature` | `varchar` | Cargo que aparecera en la firma (ej. "Secretario"). |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
-CREATE TABLE public.ranks (
+CREATE TABLE ranks (
     rank_id uuid NOT NULL,
-    rank_name character varying(100) NOT NULL,
+    name character varying(100) NOT NULL,
+    level integer,
     head_signature character varying(255) NOT NULL,
-    audit_data jsonb
+    audit_data jsonb,
+    CONSTRAINT ranks_pkey PRIMARY KEY (rank_id)
+);
+```
+
+---
+
+## Tabla: `user_sector_permissions`
+
+**Proposito:** Otorga permisos especiales a un usuario sobre un sector especifico, mas alla de los permisos de su rol. Permite que un usuario opere en sectores adicionales al suyo principal.
+
+| Columna | Tipo de Dato | Descripcion |
+|---|---|---|
+| `user_id` | `uuid` | **PK, FK** - Referencia al usuario (`users`). |
+| `sector_id` | `uuid` | **PK, FK** - Referencia al sector (`sectors`). |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
+
+```sql
+CREATE TABLE user_sector_permissions (
+    user_id uuid NOT NULL,
+    sector_id uuid NOT NULL,
+    audit_data jsonb,
+    CONSTRAINT user_sector_permissions_pkey PRIMARY KEY (user_id, sector_id)
 );
 ```

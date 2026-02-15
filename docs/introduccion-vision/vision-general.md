@@ -1,62 +1,73 @@
-# Visión General del Framework GDI
+# Vision General de GDI
 
-## Propósito del Documento
+## Proposito
 
-Este documento es la fuente de verdad central y el punto de partida para cualquier miembro que necesite comprender la estructura, el funcionamiento y la configuración del producto GDI a un nivel técnico profundo. Su propósito es:
+**GDI (Gestion Documental Inteligente)** es una plataforma open source disenada para digitalizar y modernizar la gestion documental de organismos publicos en America Latina. Su objetivo es reemplazar procesos administrativos rigidos y burocraticos por flujos de trabajo dinamicos, transparentes y eficientes.
 
-* Acelerar la curva de aprendizaje de nuevos integrantes.
-* Asegurar una comprensión unificada y consistente del sistema.
-* Servir como referencia técnica para la toma de decisiones de diseño y desarrollo.
+GDI nace como una evolucion de los sistemas de gestion documental electronica existentes en la region (SADE, GDE, GDEBA), abordando sus limitaciones estructurales con una arquitectura moderna, abierta y pensada para escalar.
 
-Esta documentación está dirigida a:
+---
 
-* Desarrolladores de software (nuevos y existentes).
-* Ingenieros de QA (Quality Assurance).
-* Arquitectos de software.
-* Líderes técnicos.
-* Sistemas de Inteligencia Artificial (IA) diseñados para comprender y asistir en el desarrollo y la gestión de productos de software.
+## Propuesta de Valor
 
-## 1.1 ¿Qué es GDI?
+### Interoperabilidad y enfoque LATAM
+Disenado con un modelo API-first y basado en estandares abiertos, GDI facilita la integracion con sistemas heterogeneos y promueve la estandarizacion a nivel regional. Permite el intercambio de datos entre diversas entidades, construyendo un ecosistema digital comun.
 
-**GDI (Gestión Documental Inteligente)** es la evolución natural del GDE (Gestión Documental Electrónica), diseñada bajo su normativa y optimizada específicamente para el ámbito municipal. Es una plataforma open source integral que transforma los procesos administrativos rígidos en flujos de trabajo dinámicos, flexibles y colaborativos, con el objetivo primordial de eliminar la burocracia y reducir drásticamente los tiempos de procesamiento.
-
-Construida sobre principios de software libre y arquitectura abierta, GDI aborda las limitaciones de los sistemas anteriores, ofreciendo una solución robusta, escalable y colaborativa. Su diseño usuario-céntrico y la integración de tecnologías de vanguardia buscan redefinir la interacción entre la ciudadanía y la administración, siendo sus usuarios principales los empleados municipales y funcionarios que operan dentro de un organismo en la gestión de una ciudad.
-
-## 1.2 Propuesta de Valor Técnica y factores diferenciadores
-
-GDI se distingue por una serie de atributos técnicos y operativos clave que lo posicionan como una solución superior en el ámbito de la gestión documental pública:
-
-### Interoperabilidad y Enfoque LATAM
-Diseñado con un modelo API-first y basado en estándares abiertos, GDI facilita la integración fluida con sistemas heterogéneos y promueve la estandarización a nivel LATAM. Esto permite la conexión y el intercambio de datos entre diversas entidades, construyendo un estándar digital único.
-
-### Experiencia de Usuario (UX) optimizada
-Las interfaces de usuario (UI) son meticulosamente diseñadas siguiendo los últimos estándares UI/UX, lo que se traduce en una curva de adopción mínima y una productividad maximizada para todos los perfiles de usuario, desde operadores hasta administradores.
+### Experiencia de Usuario optimizada
+Interfaces modernas construidas con Next.js 15 y shadcn/ui, disenadas siguiendo estandares UI/UX actuales. La curva de adopcion es minima y la productividad se maximiza para todos los perfiles de usuario.
 
 ### Eficiencia de costos y sostenibilidad
-Al adoptar un modelo de software libre (licencia AGPLv3), GDI elimina los costos asociados a licencias propietarias y reduce significativamente los gastos operativos. Esto democratiza el acceso a tecnología de punta, permitiendo a las jurisdicciones reinvertir recursos en otras áreas críticas.
+Software libre bajo licencia AGPLv3 que elimina costos de licencias propietarias. Democratiza el acceso a tecnologia de punta, permitiendo a las jurisdicciones reinvertir recursos en otras areas criticas.
 
-### Escalabilidad y flexibilidad arquitectónica
-Su arquitectura modular y distribuida permite una adaptación granular a las necesidades específicas de cada municipio o entidad, independientemente de su tamaño o complejidad. Esto asegura una escalabilidad horizontal y una implementación ágil en diversos entornos de despliegue (on-premise, cloud).
+### Escalabilidad multi-tenant
+Arquitectura multi-tenant con schemas separados en PostgreSQL, que permite servir a multiples organizaciones desde una misma instancia de forma aislada y segura. Se adapta a municipios de cualquier tamano.
 
-### Soberanía tecnológica
-La elección de código abierto garantiza el control total sobre el stack tecnológico, eliminando el vendor lock-in y fomentando la autonomía digital de las instituciones. Permite la auditoría, personalización y evolución del sistema por parte de la propia comunidad.
+### Soberania tecnologica
+El codigo abierto garantiza control total sobre el stack tecnologico, eliminando vendor lock-in y fomentando la autonomia digital de las instituciones. Permite auditoria, personalizacion y evolucion por parte de la comunidad.
 
-## 1.5 Módulos principales del sistema
+### Inteligencia Artificial integrada
+Agente de IA nativo con capacidades RAG (Retrieval-Augmented Generation) para asistencia de redaccion, busqueda semantica en expedientes, clasificacion de documentos y generacion de informes.
 
-Los módulos principales son los pilares sobre los que se construye la gestión documental y organizacional de una ciudad. Cada uno representa un componente central del sistema, con funcionalidades específicas y profundas para la administración de recursos clave.
+### Firma Digital con validez juridica
+Firma digital PAdES integrada a traves de pyHanko y PyMuPDF, garantizando la autenticidad e integridad de los documentos con plena validez legal.
 
-### 1. Módulo Documentos
+---
 
-El Módulo Documentos es el corazón de la gestión documental en GDI, diseñado para la creación, gestión, colaboración y formalización de documentos electrónicos con plena validez legal. Ofrece una gestión integral del ciclo de vida de todos los documentos, desde su creación hasta su archivo definitivo. Asegura la integridad, autenticidad y trazabilidad de cada documento, garantizando un control riguroso sobre la información oficial.
+## Modulos Principales
 
-### 2. Módulo Expedientes
+### 1. Documentos
 
-El Módulo Expedientes es el contenedor digital para la gestión de trámites y procesos administrativos. Permite la gestión integral de expedientes creados por repartición o sector, incluyendo la capacidad de registrar actuaciones, realizar seguimiento de procesos, y gestionar todas las interacciones administrativas relacionadas. Facilita la colaboración inter-áreas y asegura la trazabilidad completa del ciclo de vida de cada trámite.
+El modulo central de GDI. Gestiona el ciclo de vida completo de documentos electronicos: creacion desde plantillas, edicion colaborativa, firma digital, numeracion automatica y archivo definitivo. Cada documento mantiene trazabilidad completa de acciones y estados.
 
-### 3. Módulo Organigrama
+### 2. Expedientes
 
-El Módulo Organigrama es la columna vertebral para la administración de la estructura interna de la municipalidad dentro del sistema. Su propósito fundamental es centralizar la gestión de usuarios, roles, reparticiones y la jerarquía organizacional, asegurando que el acceso y las responsabilidades se alineen con la estructura real de la entidad. Este módulo es esencial para mantener la coherencia operativa y la seguridad en todas las interacciones dentro del sistema.
+Contenedor digital que agrupa documentos relacionados a un tramite o proceso administrativo. Soporta movimientos entre sectores (asignaciones y transferencias), vinculacion de documentos, providencias automaticas y trazabilidad completa del flujo.
 
-### 4. Módulo Registros
- Próxima fase
- 
+### 3. Notas
+
+Sistema de comunicaciones internas que permite enviar notas entre usuarios y sectores del organismo. Soporta destinatarios multiples, estados de lectura y archivo, y trazabilidad de envios.
+
+### 4. BackOffice
+
+Panel de administracion del sistema que centraliza la configuracion. Incluye:
+
+- **Organigrama**: gestion de la estructura organizacional (reparticiones, sectores, cargos, usuarios y jerarquia)
+- **Tipos de Documento**: definicion de templates con campos, permisos de firma y estados
+- **Tipos de Expediente**: configuracion de categorias y metadatos de expedientes
+- **Roles y Permisos**: control de acceso granular basado en roles
+- **API Keys**: gestion de claves para integracion con sistemas externos
+
+### 5. Base de Datos
+
+Modelo relacional completo sobre PostgreSQL 17 con extension pgvector para busqueda semantica. Estructura multi-tenant con schemas separados por organizacion.
+
+---
+
+## Licencia
+
+GDI se distribuye bajo la licencia **AGPLv3** (GNU Affero General Public License v3). Esto significa que:
+
+- El codigo fuente esta disponible publicamente
+- Cualquier modificacion desplegada debe compartir el codigo fuente
+- Se fomenta la colaboracion y la mejora continua por parte de la comunidad
+- Las instituciones mantienen soberania tecnologica total

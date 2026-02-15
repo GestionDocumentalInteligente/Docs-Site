@@ -1,8 +1,8 @@
-# Backoffice GDI - Configuración de Accesos y Control
+# Configuracion de Accesos y Control
 
-## Propósito de la Sección
+## Proposito de la Seccion
 
-La **Configuración de Accesos y Control** permite a los Administradores gestionar el acceso al Backoffice de GDI, controlando quién puede administrar el sistema y configurar sus parámetros críticos. Esta sección implementa un modelo de **administración distribuida** donde múltiples Administradores pueden colaborar en la gestión del sistema.
+La seccion de **Accesos y Control** permite a los Administradores gestionar el acceso al Backoffice de GDI (`:3013`), controlando quien puede administrar el sistema y configurar sus parametros criticos. La autenticacion se realiza a traves de **Auth0** como proveedor de identidad, y los roles se gestionan mediante las tablas `roles` y `user_roles` de la base de datos.
 
 ### Objetivos principales:
 

@@ -34,11 +34,13 @@ La seguridad en el módulo de Documentos de GDI se basa en el control estricto d
 
 ### Estado `signed` (Documento Oficial)
 
-**Protección Permanente:**
+**Proteccion Permanente:**
 - ✅ Documento completamente inmutable
-- ✅ Entrada automática en tabla `official_documents`
-- ✅ Número oficial único con constraint `UNIQUE`
-- ✅ PDF firmado almacenado en `signed_pdf_url`
+- ✅ Entrada automatica en tabla `official_documents`
+- ✅ Numero oficial unico con constraint `UNIQUE`
+- ✅ PDF firmado digitalmente por GDI-Notary (:8001) con pyHanko (PAdES/CAdES)
+- ✅ Firma visual en el PDF: logo institucional, fecha, numero oficial y nombre del firmante
+- ✅ PDF almacenado en bucket `oficial` de Cloudflare R2, accesible via URLs firmadas
 
 ---
 
@@ -84,13 +86,11 @@ CONSTRAINT unique_reserved_number UNIQUE (reserved_number)
 
 ### Control de Concurrencia
 
-**Problemas Identificados:**
-- 🚧 Sistema actual vulnerable a condiciones de carrera
-- 🚧 Múltiples usuarios numerando simultáneamente el mismo tipo
-
-**Mitigaciones Implementadas:**
+**Solucion Implementada:**
+- ✅ **Advisory lock (888888)**: Serializa las operaciones de numeracion para prevenir race conditions
+- ✅ **global_sequence compartida**: Secuencia unica entre todos los tipos de documento
 - ✅ Constraint de unicidad en base de datos
-- ✅ Estados de validación: `pending`, `valid`, `invalid`
+- ✅ Estados de validacion: `pending`, `valid`, `invalid`
 
 ---
 
@@ -198,9 +198,11 @@ CREATE TYPE document_status AS ENUM (
 ### Cumplimiento Legal
 
 **Ley 25.506 - Firma Digital:**
-- ✅ Estructura preparada para firma digital
-- ✅ Campo `required_signature` en tipos de documento
-- 🚧 Integración con certificados digitales pendiente
+- ✅ Firma digital implementada via GDI-Notary (:8001) con pyHanko
+- ✅ Soporte PAdES (PDF) y CAdES
+- ✅ Firma visual: logo institucional, fecha, numero oficial, nombre del firmante
+- ✅ Multi-firmante secuencial (cada firmante firma en orden)
+- ✅ Campo `required_signature` en tipos de documento para configurar nivel de firma requerido
 
 **Ley 27.275 - Acceso a la Información Pública:**
 - ✅ Documentos en estado `signed` son públicamente consultables
@@ -212,25 +214,26 @@ CREATE TYPE document_status AS ENUM (
 ## 📋 Checklist de Estado Actual
 
 ### ✅ **Implementado y Funcional:**
-- [x] Control de estados con transiciones válidas
-- [x] Sistema RBAC básico con roles organizacionales  
-- [x] Control de acceso por repartición/department
-- [x] Numeración secuencial with constraints de unicidad
-- [x] Auditoría básica en campo `audit_data`
-- [x] Validación de tipos de documento por repartición
-- [x] Eliminación lógica que preserva integridad
+- [x] Control de estados con transiciones validas
+- [x] Sistema RBAC con roles organizacionales
+- [x] Control de acceso por reparticion/department
+- [x] Numeracion secuencial con advisory lock (888888) y global_sequence compartida
+- [x] Auditoria en campo `audit_data`
+- [x] Validacion de tipos de documento por reparticion
+- [x] Eliminacion logica que preserva integridad
+- [x] Firma digital via GDI-Notary con pyHanko (PAdES/CAdES)
+- [x] Generacion de PDF via GDI-PDFComposer con Gotenberg
+- [x] Almacenamiento en Cloudflare R2 (buckets tosign/oficial)
+- [x] URLs firmadas para descarga segura
 
-### 🚧 **Estructura Preparada, Lógica Pendiente:**
-- [ ] Sistema ACL completo en `audit_data` 
-- [ ] Editor colaborativo en tiempo real (`pad_id`)
-- [ ] Integración con certificados digitales oficiales
-- [ ] Funciones SQL de validación automática
+### 🚧 **Estructura Preparada, Logica Pendiente:**
+- [ ] Sistema ACL completo en `audit_data`
+- [ ] Funciones SQL de validacion automatica
 
 ### ❌ **No Implementado:**
-- [ ] Delegación temporal de firmas
-- [ ] Escalación automática por inactividad  
+- [ ] Delegacion temporal de firmas
+- [ ] Escalacion automatica por inactividad
 - [ ] Alertas por procesos estancados
-- [ ] Control de concurrencia robusto en numeración
 
 ---
 

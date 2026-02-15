@@ -86,20 +86,23 @@ CREATE TYPE validation_status_enum AS ENUM (
 
 ## 🔄 Proceso de Numeración Completo
 
-### FASE 1: Reserva de Número
+### FASE 1: Reserva de Numero
 
 **Trigger**: Numerador inicia proceso de firma final
 
+La reserva utiliza un **advisory lock (888888)** para serializar el acceso y una **global_sequence compartida** entre todos los tipos de documento.
+
 ```sql
--- 1. Calcular siguiente número correlativo
+-- 1. Adquirir advisory lock para prevenir race conditions
+SELECT pg_advisory_lock(888888);
+
+-- 2. Calcular siguiente numero de la secuencia global
 WITH next_number AS (
     SELECT COALESCE(MAX(CAST(reserved_number AS INTEGER)), 0) + 1 as next_num
-    FROM numeration_requests nr
-    JOIN document_types dt ON nr.document_type_id = dt.document_type_id
-    WHERE dt.document_type_id = ?
-      AND nr.year = EXTRACT(YEAR FROM NOW())
+    FROM numeration_requests
+    WHERE year = EXTRACT(YEAR FROM NOW())
 )
--- 2. Reservar número
+-- 3. Reservar numero
 INSERT INTO numeration_requests (
     document_type_id,
     user_id,
@@ -108,16 +111,19 @@ INSERT INTO numeration_requests (
     reserved_number,
     reserved_at,
     validation_status
-) 
-SELECT 
+)
+SELECT
     ?,                              -- document_type_id
     ?,                              -- numerator user_id
     ?,                              -- department_id del numerador
     EXTRACT(YEAR FROM NOW()),
-    LPAD(next_num::TEXT, 6, '0'),  -- Número con ceros a la izquierda
+    LPAD(next_num::TEXT, 6, '0'),  -- Numero con ceros a la izquierda
     NOW(),
     'pending'
 FROM next_number;
+
+-- 4. Liberar advisory lock
+SELECT pg_advisory_unlock(888888);
 ```
 
 ### FASE 2: Generación del Número Oficial
@@ -178,44 +184,45 @@ COMMIT;
 
 ### Problema de Concurrencia
 
-Múltiples usuarios intentando numerar documentos simultáneamente del mismo tipo.
+Multiples usuarios intentando numerar documentos simultaneamente.
 
-### Solución Implementada
+### Solucion Implementada
 
-#### 1. Lock Optimista en Reserva
+#### 1. Advisory Lock y Global Sequence
+
+El sistema utiliza un **advisory lock con ID 888888** para serializar las operaciones de numeracion. La secuencia es **global_sequence compartida entre todos los tipos de documento**, lo que garantiza unicidad absoluta.
 
 ```sql
--- Uso de CTE para atomic increment
-WITH RECURSIVE next_available AS (
-    SELECT 1 as candidate_number
-    UNION ALL
-    SELECT candidate_number + 1
-    FROM next_available
-    WHERE candidate_number < (
-        SELECT MAX(CAST(reserved_number AS INTEGER)) + 10
-        FROM numeration_requests 
-        WHERE document_type_id = ? AND year = ?
-    )
-),
-available_number AS (
-    SELECT MIN(candidate_number) as next_number
-    FROM next_available
-    WHERE candidate_number NOT IN (
-        SELECT CAST(reserved_number AS INTEGER)
-        FROM numeration_requests
-        WHERE document_type_id = ? AND year = ?
-    )
-)
-INSERT INTO numeration_requests (...)
-SELECT ..., LPAD(next_number::TEXT, 6, '0')
-FROM available_number;
+-- Advisory lock para prevenir race conditions
+SELECT pg_advisory_lock(888888);
+
+-- Obtener siguiente numero de la secuencia global
+-- La global_sequence es compartida entre todos los tipos de documento
+SELECT COALESCE(MAX(CAST(reserved_number AS INTEGER)), 0) + 1 as next_num
+FROM numeration_requests
+WHERE year = EXTRACT(YEAR FROM NOW());
+
+-- Insertar reserva con el numero obtenido
+INSERT INTO numeration_requests (
+    document_type_id, user_id, department_id,
+    year, reserved_number, reserved_at, validation_status
+) VALUES (
+    ?, ?, ?,
+    EXTRACT(YEAR FROM NOW()),
+    LPAD(next_num::TEXT, 6, '0'),
+    NOW(),
+    'pending'
+);
+
+-- Liberar lock
+SELECT pg_advisory_unlock(888888);
 ```
 
 #### 2. Constraint de Unicidad
 
 ```sql
 -- Constraint en BD para prevenir duplicados
-ALTER TABLE numeration_requests 
+ALTER TABLE numeration_requests
 ADD CONSTRAINT unique_reserved_number UNIQUE (reserved_number);
 
 -- Constraint en documento oficial
@@ -226,8 +233,8 @@ ADD CONSTRAINT unique_official_number UNIQUE (official_number);
 #### 3. Timeout de Reserva
 
 ```sql
--- Cleanup automático de reservas vencidas (cron job)
-UPDATE numeration_requests 
+-- Cleanup automatico de reservas vencidas (cron job)
+UPDATE numeration_requests
 SET validation_status = 'invalid'
 WHERE validation_status = 'pending'
   AND reserved_at < (NOW() - INTERVAL '1 hour')
@@ -236,61 +243,31 @@ WHERE validation_status = 'pending'
 
 ---
 
-## 📊 Tipos de Numeración por Categoría
+## 📊 Secuencia Global de Numeracion
 
-### Documentos con Carácter de Acto Administrativo
+### global_sequence compartida
 
-**Características**:
-- ✅ Integración con numeración histórica/externa
-- ✅ Secuencia estricta sin saltos
-- ✅ Validación especial por department autorizado
+El sistema utiliza una **secuencia global unica compartida entre todos los tipos de documento**. Esto significa que los numeros correlativos no se asignan por tipo de documento, sino de forma global para todo el sistema en un ano dado.
 
-#### Configuración Inicial
-
-```sql
--- Campo especial en document_types para actos administrativos
-ALTER TABLE document_types 
-ADD COLUMN last_paper_number INTEGER; -- Último número en papel
-
--- Inicialización con número histórico
-UPDATE document_types 
-SET last_paper_number = 150  -- Último decreto en papel
-WHERE acronym = 'DECRE';
+**Ejemplo de secuencia global:**
+```
+000001 - DECRE-2025-000001-TN-INTEN   (Decreto)
+000002 - RESOL-2025-000002-TN-SECGOB  (Resolucion)
+000003 - DECRE-2025-000003-TN-INTEN   (Decreto)
+000004 - IF-2025-000004-TN-SECGOB     (Informe)
 ```
 
-#### Lógica de Continuidad
+El numero correlativo es compartido, pero el **numero oficial completo** es unico gracias a la combinacion con el acronimo del tipo de documento.
+
+### Reinicio Anual
+
+La secuencia global se reinicia automaticamente cada ano:
 
 ```sql
--- Continuar numeración desde sistema anterior
-WITH historical_base AS (
-    SELECT 
-        COALESCE(dt.last_paper_number, 0) as base_number,
-        COALESCE(MAX(CAST(nr.reserved_number AS INTEGER)), 0) as max_digital
-    FROM document_types dt
-    LEFT JOIN numeration_requests nr ON dt.document_type_id = nr.document_type_id
-        AND nr.year = EXTRACT(YEAR FROM NOW())
-    WHERE dt.document_type_id = ?
-    GROUP BY dt.last_paper_number
-)
-SELECT GREATEST(base_number, max_digital) + 1 as next_number
-FROM historical_base;
-```
-
-### Documentos sin Carácter de Acto Administrativo
-
-**Características**:
-- ✅ Numeración secuencial desde 1 cada año
-- ✅ Sin restricciones de continuidad histórica
-- ✅ Mayor flexibilidad operativa
-
-```sql
--- Reinicio automático cada año
-SELECT COALESCE(MAX(CAST(reserved_number AS INTEGER)), 0) + 1 as next_number
-FROM numeration_requests nr
-JOIN document_types dt ON nr.document_type_id = dt.document_type_id
-WHERE dt.document_type_id = ?
-  AND nr.year = EXTRACT(YEAR FROM NOW())
-  AND dt.last_paper_number IS NULL; -- No es acto administrativo
+-- La secuencia se reinicia al cambiar el ano
+SELECT COALESCE(MAX(CAST(reserved_number AS INTEGER)), 0) + 1 as next_num
+FROM numeration_requests
+WHERE year = EXTRACT(YEAR FROM NOW());
 ```
 
 ---

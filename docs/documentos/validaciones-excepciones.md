@@ -201,10 +201,12 @@ CONSTRAINT numeration_requests_reserved_number_key
 - **Sin duplicados**: Prevención de números repetidos.
 - **Sin saltos**: Detección de brechas en la secuencia.
 
-**Implementación Técnica (Reserva atómica de número):**
+**Implementacion Tecnica (Reserva atomica de numero):**
+
+El sistema utiliza un **advisory lock con ID 888888** y una **global_sequence compartida** entre todos los tipos de documento para garantizar atomicidad.
 
 ```sql
--- Función atómica para reservar número
+-- Funcion atomica para reservar numero
 CREATE OR REPLACE FUNCTION reserve_next_number(
     p_document_type_id UUID,
     p_user_id UUID,
@@ -215,19 +217,18 @@ DECLARE
     v_reserved_number VARCHAR;
     v_year INTEGER := EXTRACT(YEAR FROM NOW());
 BEGIN
-    -- Bloqueo para evitar concurrencia
-    LOCK TABLE numeration_requests IN SHARE UPDATE EXCLUSIVE MODE;
-    
-    -- Obtener siguiente número
+    -- Advisory lock 888888 para prevenir race conditions
+    PERFORM pg_advisory_lock(888888);
+
+    -- Obtener siguiente numero de la secuencia global (compartida entre todos los tipos)
     SELECT COALESCE(MAX(CAST(reserved_number AS INTEGER)), 0) + 1
     INTO v_next_number
     FROM numeration_requests
-    WHERE document_type_id = p_document_type_id
-      AND year = v_year;
-    
-    -- Formatear número
+    WHERE year = v_year;
+
+    -- Formatear numero
     v_reserved_number := LPAD(v_next_number::TEXT, 6, '0');
-    
+
     -- Insertar reserva
     INSERT INTO numeration_requests (
         document_type_id, user_id, department_id,
@@ -236,7 +237,10 @@ BEGIN
         p_document_type_id, p_user_id, p_department_id,
         v_year, v_reserved_number, NOW(), 'pending'
     );
-    
+
+    -- Liberar advisory lock
+    PERFORM pg_advisory_unlock(888888);
+
     RETURN v_reserved_number;
 END;
 $$ LANGUAGE plpgsql;
@@ -402,11 +406,11 @@ $$ LANGUAGE plpgsql;
 
 #### Integridad de Numeración
 
-**Prevención de Problemas:**
+**Prevencion de Problemas:**
 
-- **Servicio NUMERADOR_OFICIAL**: Garantiza secuencialidad atómica.
-- **Bloqueos de concurrencia**: Previene asignación simultánea.
-- **Validaciones cruzadas**: Verificación múltiple antes de asignar.
+- **Advisory lock (888888)**: Serializa operaciones de numeracion para prevenir race conditions.
+- **global_sequence compartida**: Secuencia unica entre todos los tipos de documento.
+- **Validaciones cruzadas**: Verificacion multiple antes de asignar.
 
 **Control de Calidad:**
 
@@ -446,11 +450,6 @@ $$ LANGUAGE plpgsql;
 
 - **Limitación**: No existe sistema automatizado de licencias o delegación temporal.
 - **Desarrollo Futuro**: Implementar un sistema de delegación temporal de firmas, con límites de tiempo y auditoría completa.
-
-#### Edición Colaborativa
-
-- **Limitación**: No hay sistema de edición simultánea en tiempo real.
-- **Desarrollo Futuro**: Implementar edición colaborativa en tiempo real con control de versiones y resolución de conflictos.
 
 #### Timeouts de Proceso
 
@@ -510,10 +509,10 @@ $$ LANGUAGE plpgsql;
 
 ### 🔶 **EN DESARROLLO**
 
-- [ ] Funciones de validación de acceso
-- [ ] Triggers de transición de estados
+- [ ] Funciones de validacion de acceso
+- [ ] Triggers de transicion de estados
 - [ ] Validaciones de firmantes activos
-- [ ] Control de numeración atómica
+- [x] Control de numeracion atomica (advisory lock 888888 + global_sequence)
 - [ ] Sistema ACL en audit_data
 
 ### 📋 **PENDIENTE**
@@ -534,9 +533,9 @@ $$ LANGUAGE plpgsql;
 
 ## Enlaces Relacionados
 
-- [Componentes Técnicos y Datos](./06-componentes-datos.md)
-- [Seguridad](./08-seguridad.md)
-- [Estados y Transiciones](./03-estados-transiciones.md)
-- [Acceso y Permisos](./05-acceso-permisos.md)
+- [Consideraciones de Seguridad](./consideraciones-seguridad.md)
+- [Estados y Transiciones](./estados-transiciones.md)
+- [Acceso y Permisos](./acceso-permisos.md)
+- [Modelo de Datos](./modelo-datos-docs.md)
 
 

@@ -1,12 +1,12 @@
-# Configuración de Información General
+# Configuracion de Informacion General
 
-## 1. Propósito de la Sección
+## 1. Proposito de la Seccion
 
-La sección de **Información General** es el primer y más fundamental paso en la configuración de una nueva instancia de GDI. Permite al Administrador establecer la identidad oficial y la apariencia visual del municipio u organismo, asegurando que estos elementos se apliquen de manera consistente en todo el sistema.
+La seccion de **Informacion General** es el primer y mas fundamental paso en la configuracion de una nueva instancia de GDI. Permite al Administrador establecer la identidad oficial y la apariencia visual del municipio u organismo, asegurando que estos elementos se apliquen de manera consistente en todo el sistema. Esta configuracion se realiza desde el Backoffice (`:3013`) y persiste en las tablas `municipalities` y `municipalities_settings` de la base de datos.
 
-## 2. Información Institucional
+## 2. Informacion Institucional
 
-Este apartado agrupa los datos básicos que definen legal y administrativamente a la entidad. Esta información se utilizará en encabezados de documentos, carátulas de expedientes y otras comunicaciones oficiales.
+Este apartado agrupa los datos basicos que definen legal y administrativamente a la entidad. Esta informacion se utiliza en encabezados de documentos, caratulas de expedientes y otras comunicaciones oficiales.
 
 ### 2.1 Tabla de Campos y Descripciones
 
@@ -20,7 +20,7 @@ Este apartado agrupa los datos básicos que definen legal y administrativamente 
 
 ## 3. Identidad Visual
 
-Esta sección personaliza la apariencia de GDI para que coincida con la imagen de marca de la institución, garantizando una experiencia de usuario coherente y profesional.
+Esta seccion personaliza la apariencia de GDI para que coincida con la imagen de marca de la institucion, garantizando una experiencia de usuario coherente y profesional.
 
 ### 3.1 Tabla de Elementos Visuales
 
@@ -32,17 +32,21 @@ Esta sección personaliza la apariencia de GDI para que coincida con la imagen d
 | **Imagen portada** | Imagen de fondo o bienvenida que se muestra en pantallas de inicio de sesión o en procesos de incorporación de nuevos usuarios. | Formato: PNG, JPG, GIF. Tamaño Máx: 5MB. (`municipalities_settings.cover_image_id`) |
 | **Frase anual (opcional)** | Un lema o frase que se puede incluir en los encabezados de los documentos, a menudo relacionado con el año en curso. | Texto libre. Su uso se define en las plantillas de documentos. (`municipalities_settings.annual_slogan`) |
 
-## 4. Flujo de Configuración y Validaciones
+## 4. Flujo de Configuracion y Validaciones
 
 ### Proceso paso a paso:
 
-1. **Completar Campos**: El Administrador rellena todos los campos de "Información Institucional" y sube los archivos de "Identidad Visual".
+1. **Completar Campos**: El Administrador rellena todos los campos de "Informacion Institucional" y sube los archivos de "Identidad Visual".
 
-2. **Validaciones**: El sistema valida que los campos obligatorios (como Nombre y Acrónimo) no estén vacíos y que los archivos subidos cumplan con las restricciones de formato y tamaño.
+2. **Validaciones**: El sistema valida que los campos obligatorios (como Nombre y Acronimo) no esten vacios y que los archivos subidos cumplan con las restricciones de formato y tamano.
 
-3. **Guardar Cambios**: Al presionar el botón "Guardar Cambios", la configuración se aplica de forma inmediata en toda la plataforma, afectando:
+3. **Guardar Cambios**: Al presionar el boton "Guardar Cambios", la configuracion se aplica de forma inmediata en toda la plataforma.
 
 ### Efectos inmediatos:
 
-- **Interfaz Web**: El Logo Institucional y el Color Institucional se actualizan en tiempo real.
-- **Módulos Documentos y Expedientes**: Todos los nuevos documentos y carátulas generados a partir de este momento utilizarán la nueva información y logos. Los documentos existentes no se modifican para preservar su integridad histórica.
+- **Interfaz Web**: El Logo Institucional y el Color Institucional se actualizan en tiempo real en el sistema principal (`:3003`).
+- **Modulos Documentos y Expedientes**: Todos los nuevos documentos y caratulas generados a partir de ese momento utilizan la nueva informacion y logos. Los documentos existentes no se modifican para preservar su integridad historica.
+
+### Persistencia:
+
+Los datos se almacenan en las tablas `municipalities` (datos institucionales basicos) y `municipalities_settings` (identidad visual y configuraciones de presentacion), accesibles tanto por el backend principal (`:8000`) como por el backend del Backoffice (`:8010`).

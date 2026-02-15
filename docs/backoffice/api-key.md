@@ -1,8 +1,8 @@
-# Backoffice GDI - Configuración de API Keys
+# Configuracion de API Keys
 
-## Propósito de la Sección
+## Proposito de la Seccion
 
-La **Configuración de API Keys** es el repositorio centralizado donde los Administradores gestionan todas las **credenciales y tokens** que GDI necesita para conectarse a servicios externos. Funciona como un **administrador de credenciales** seguro, similar a plataformas como OpenAI o AWS Console.
+La seccion de **API Keys** del Backoffice es el repositorio centralizado donde los Administradores gestionan todas las **credenciales y tokens** que GDI necesita para conectarse a servicios externos. Funciona como un **administrador de credenciales** seguro, gestionado desde el Backoffice (`:3013`) y almacenado de forma cifrada en la base de datos.
 
 ### Objetivos principales:
 

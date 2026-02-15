@@ -1,42 +1,45 @@
-# Modelo de Datos: Módulo de Documentos
+# Modelo de Datos: Modulo de Documentos
 
-Este documento detalla la estructura de las tablas principales que componen el módulo de Documentos en GDI, basado en el esquema de la base de datos.
+Este documento detalla la estructura de las tablas principales que componen el modulo de Documentos en GDI, basado en el esquema de la base de datos.
 
 ---
 
 ## Tabla: `document_draft`
 
-**Propósito:** Almacena los documentos mientras están en proceso de creación, edición o firma. Es la tabla de trabajo principal del módulo.
+**Proposito:** Almacena los documentos mientras estan en proceso de creacion, edicion o firma. Es la tabla de trabajo principal del modulo.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `document_id` | `uuid` | **PK** - Identificador único del documento. |
-| `document_type_id` | `uuid` | **FK** - Referencia al tipo de documento (`document_types`). |
-| `created_by` | `uuid` | **FK** - Usuario que creó el documento (`users`). |
-| `reference` | `text` | Asunto o referencia principal del documento. |
+| `id` | `uuid` | **PK** - Identificador unico del documento. |
+| `document_type_id` | `int` | **FK** - Referencia al tipo de documento (`document_types`). |
+| `created_by` | `uuid` | **FK** - Usuario que creo el documento (`users`). |
+| `reference` | `varchar(100)` | Asunto o referencia principal del documento. |
 | `content` | `jsonb` | Contenido completo del documento en formato JSON. |
-| `status` | `document_status` | Estado actual del flujo (draft, sent_to_sign, signed, etc.). |
-| `sent_to_sign_at` | `timestamp` | Fecha y hora en que se envió a firmar. |
-| `last_modified_at`| `timestamp` | Última fecha de modificación. |
-| `is_deleted` | `boolean` | Marca para borrado lógico (soft delete). |
-| `audit_data` | `jsonb` | Metadatos de auditoría (quién creó, modificó, etc.). |
-| `sent_by` | `uuid` | **FK** - Usuario que envió el documento a firmar (`users`). |
-| `pad_id` | `varchar` | Identificador para la sesión de edición colaborativa. |
+| `status` | `document_status` | Estado actual del flujo (draft, sent_to_sign, signed, rejected). |
+| `sent_to_sign_at` | `timestamptz` | Fecha y hora en que se envio a firmar. |
+| `last_modified_at` | `timestamptz` | Ultima fecha de modificacion. |
+| `is_deleted` | `boolean` | Marca para borrado logico (soft delete). |
+| `audit_data` | `jsonb` | Metadatos de auditoria (quien creo, modifico, etc.). |
+| `sent_by` | `uuid` | **FK** - Usuario que envio el documento a firmar (`users`). |
+| `pad_id` | `varchar(255)` | Identificador para la sesion de edicion colaborativa. |
+| `resume` | `text` | Resumen libre del documento. |
 
 ```sql
-CREATE TABLE public.document_draft (
-    document_id uuid DEFAULT gen_random_uuid() NOT NULL,
-    document_type_id uuid NOT NULL,
-    created_by uuid NOT NULL,
-    reference text NOT NULL,
-    content jsonb NOT NULL,
-    status public.document_status DEFAULT 'draft'::public.document_status NOT NULL,
-    sent_to_sign_at timestamp without time zone,
-    last_modified_at timestamp without time zone DEFAULT now(),
-    is_deleted boolean DEFAULT false,
-    audit_data jsonb,
-    sent_by uuid,
-    pad_id character varying(255) NOT NULL
+CREATE TABLE document_draft (
+    id UUID DEFAULT gen_random_uuid() NOT NULL,
+    document_type_id INT NOT NULL,
+    created_by UUID NOT NULL,
+    reference VARCHAR(100) NOT NULL,
+    content JSONB NOT NULL,
+    status document_status DEFAULT 'draft' NOT NULL,
+    sent_to_sign_at TIMESTAMPTZ,
+    last_modified_at TIMESTAMPTZ DEFAULT NOW(),
+    is_deleted BOOLEAN DEFAULT false,
+    audit_data JSONB,
+    sent_by UUID,
+    pad_id VARCHAR(255) NOT NULL,
+    resume TEXT,
+    CONSTRAINT documents_pkey PRIMARY KEY (id)
 );
 ```
 
@@ -44,71 +47,91 @@ CREATE TABLE public.document_draft (
 
 ## Tabla: `official_documents`
 
-**Propósito:** Almacena la versión final y legalmente válida de los documentos que han completado el ciclo de firma y numeración.
+**Proposito:** Almacena la version final y legalmente valida de los documentos que han completado el ciclo de firma y numeracion.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `document_id` | `uuid` | **PK** - Identificador único del documento. |
-| `document_type_id`| `uuid` | **FK** - Referencia al tipo de documento (`document_types`). |
-| `numeration_requests_id` | `uuid` | **FK** - Referencia a la solicitud de numeración (`numeration_requests`). |
-| `reference` | `varchar` | Asunto o referencia del documento. |
+| `id` | `uuid` | **PK** - Identificador unico del documento. |
+| `document_type_id` | `int` | **FK** - Referencia al tipo de documento (`document_types`). |
+| `reference` | `varchar(100)` | Asunto o referencia del documento. |
 | `content` | `jsonb` | Contenido final y congelado del documento. |
-| `official_number` | `varchar` | Número oficial asignado (ej. IF-2025-...). |
-| `year` | `smallint` | Año de la numeración. |
+| `official_number` | `varchar(50)` | Numero oficial asignado (ej. IF-2025-000001-TNV-DGCO). |
+| `year` | `smallint` | Anio de la numeracion. |
 | `department_id` | `uuid` | **FK** - Departamento que numera el documento (`departments`). |
-| `numerator_id` | `uuid` | **FK** - Usuario que asignó el número oficial (`users`). |
-| `signed_at` | `timestamp` | Fecha y hora de la firma final que oficializa el documento. |
-| `signed_pdf_url` | `varchar` | URL al PDF firmado y almacenado. |
+| `numerator_id` | `uuid` | **FK** - Usuario que asigno el numero oficial (`users`). |
+| `signed_at` | `timestamptz` | Fecha y hora de la firma final que oficializa el documento. |
 | `signers` | `jsonb` | JSON con los datos consolidados de todos los firmantes. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `global_sequence` | `int` | Numero secuencial global unico por municipio (asignado con advisory lock). |
+| `signer_sector_ids` | `uuid[]` | Array de sector_ids de todos los firmantes (para busqueda eficiente). |
+| `resume` | `text` | Resumen libre del documento (copiado desde draft al firmar). |
+| `created_at` | `timestamptz` | Fecha de creacion del registro. |
 
 ```sql
-CREATE TABLE public.official_documents (
-    document_id uuid NOT NULL,
-    document_type_id uuid NOT NULL,
-    numeration_requests_id uuid NOT NULL,
-    reference character varying(100) NOT NULL,
-    content jsonb NOT NULL,
-    official_number character varying(10) NOT NULL,
-    year smallint NOT NULL,
-    department_id uuid NOT NULL,
-    numerator_id uuid NOT NULL,
-    signed_at timestamp without time zone NOT NULL,
-    signed_pdf_url character varying(255) NOT NULL,
-    signers jsonb,
-    audit_data jsonb
+CREATE TABLE official_documents (
+    id UUID NOT NULL,
+    document_type_id INT NOT NULL,
+    reference VARCHAR(100) NOT NULL,
+    content JSONB NOT NULL,
+    official_number VARCHAR(50) NOT NULL,
+    year SMALLINT NOT NULL,
+    department_id UUID NOT NULL,
+    numerator_id UUID NOT NULL,
+    signed_at TIMESTAMPTZ NOT NULL,
+    signers JSONB,
+    global_sequence INT,
+    signer_sector_ids UUID[],
+    resume TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT official_documents_pkey PRIMARY KEY (id)
 );
 ```
+
+### Mecanismo de Numeracion: `global_sequence` y Advisory Lock
+
+La columna `global_sequence` en `official_documents` es un numero secuencial unico por schema (municipio) que se asigna al firmar un documento. Para garantizar la unicidad bajo concurrencia, el sistema utiliza un **advisory lock** de PostgreSQL con el ID `888888`:
+
+```python
+# En GDI-Backend/shared/numbering.py
+OFFICIAL_DOCUMENTS_LOCK_ID = 888888
+
+# El proceso de numeracion:
+# 1. Se adquiere pg_advisory_xact_lock(888888)
+# 2. Se lee el MAX(global_sequence) del schema
+# 3. Se asigna el siguiente numero
+# 4. Se libera el lock al finalizar la transaccion
+```
+
+Esto previene race conditions cuando multiples usuarios firman documentos simultaneamente.
 
 ---
 
 ## Tabla: `document_signers`
 
-**Propósito:** Gestiona la lista de usuarios que deben firmar un documento, su orden y el estado de su firma.
+**Proposito:** Gestiona la lista de usuarios que deben firmar un documento, su orden y el estado de su firma.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `document_signer_id` | `uuid` | **PK** - Identificador único de la asignación de firma. |
+| `id` | `uuid` | **PK** - Identificador unico de la asignacion de firma. |
 | `document_id` | `uuid` | **FK** - Documento al que pertenece la firma (`document_draft`). |
 | `user_id` | `uuid` | **FK** - Usuario firmante (`users`). |
-| `is_numerator` | `boolean` | `true` si este firmante es el que asigna el número oficial. |
+| `is_numerator` | `boolean` | `true` si este firmante es el que asigna el numero oficial. |
 | `signing_order` | `integer` | Orden secuencial de firma. `1` para el numerador. |
 | `status` | `document_signer_status` | Estado de la firma individual (pending, signed, rejected). |
-| `signed_at` | `timestamp` | Fecha y hora en que el usuario firmó. |
-| `observations` | `text` | Comentarios u observaciones hechas por el firmante. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `signed_at` | `timestamptz` | Fecha y hora en que el usuario firmo. |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
-CREATE TABLE public.document_signers (
-    document_signer_id uuid DEFAULT gen_random_uuid() NOT NULL,
-    document_id uuid NOT NULL,
-    user_id uuid NOT NULL,
-    is_numerator boolean DEFAULT false,
-    signing_order integer,
-    status public.document_signer_status,
-    signed_at timestamp without time zone,
-    observations text,
-    audit_data jsonb
+CREATE TABLE document_signers (
+    id UUID DEFAULT gen_random_uuid() NOT NULL,
+    document_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    is_numerator BOOLEAN DEFAULT false,
+    signing_order INTEGER,
+    status document_signer_status,
+    signed_at TIMESTAMPTZ,
+    audit_data JSONB,
+    CONSTRAINT document_signers_pkey PRIMARY KEY (id),
+    CONSTRAINT unique_signer_per_document UNIQUE (document_id, user_id)
 );
 ```
 
@@ -116,91 +139,121 @@ CREATE TABLE public.document_signers (
 
 ## Tabla: `document_rejections`
 
-**Propósito:** Registra un historial de todos los rechazos que ha tenido un documento durante el ciclo de firma.
+**Proposito:** Registra un historial de todos los rechazos que ha tenido un documento durante el ciclo de firma.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `rejection_id` | `uuid` | **PK** - Identificador único del rechazo. |
+| `rejection_id` | `uuid` | **PK** - Identificador unico del rechazo. |
 | `document_id` | `uuid` | **FK** - Documento que fue rechazado (`document_draft`). |
-| `rejected_by` | `uuid` | **FK** - Usuario que realizó el rechazo (`users`). |
-| `reason` | `text` | Motivo o justificación del rechazo. |
-| `rejected_at` | `timestamp` | Fecha y hora del rechazo. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `rejected_by` | `uuid` | **FK** - Usuario que realizo el rechazo (`users`). |
+| `reason` | `text` | Motivo o justificacion del rechazo. |
+| `rejected_at` | `timestamptz` | Fecha y hora del rechazo. |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
-CREATE TABLE public.document_rejections (
-    rejection_id uuid DEFAULT gen_random_uuid() NOT NULL,
-    document_id uuid NOT NULL,
-    rejected_by uuid NOT NULL,
-    reason text,
-    rejected_at timestamp without time zone DEFAULT now(),
-    audit_data jsonb
+CREATE TABLE document_rejections (
+    rejection_id UUID DEFAULT gen_random_uuid() NOT NULL,
+    document_id UUID NOT NULL,
+    rejected_by UUID NOT NULL,
+    reason TEXT,
+    rejected_at TIMESTAMPTZ DEFAULT NOW(),
+    audit_data JSONB,
+    CONSTRAINT document_rejections_pkey PRIMARY KEY (rejection_id)
 );
 ```
 
 ---
 
-## Tabla: `document_types`
+## Tabla: `document_chunks`
 
-**Propósito:** Define las plantillas y reglas de negocio para cada tipo de documento que se puede crear en el municipio.
+**Proposito:** Almacena fragmentos (chunks) de documentos oficiales con sus embeddings vectoriales para busqueda semantica (RAG). Utiliza la extension pgvector.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `document_type_id` | `uuid` | **PK** - Identificador único del tipo de documento. |
-| `global_document_type_id` | `uuid` | **FK** - Referencia a una plantilla global (`global_document_types`). |
-| `name` | `varchar` | Nombre descriptivo del tipo de documento (ej. "Informe Técnico"). |
-| `acronym` | `varchar` | Sigla única para la nomenclatura (ej. "IF"). |
-| `description` | `text` | Descripción del propósito del documento. |
-| `required_signature` | `required_signature_enum` | Define el tipo de firma requerida (electrónica, digital, etc.). |
-| `is_active` | `boolean` | `true` si el tipo de documento está disponible para ser usado. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `id` | `uuid` | **PK** - Identificador unico del chunk. |
+| `official_document_id` | `uuid` | **FK** - Documento oficial al que pertenece (`official_documents`). |
+| `chunk_index` | `integer` | Indice secuencial del chunk dentro del documento. |
+| `chunk_text` | `text` | Texto del fragmento. |
+| `embedding` | `vector(1536)` | Vector de embedding generado por el modelo de IA. |
+| `embedding_model` | `varchar(100)` | Modelo usado para generar el embedding (default: `text-embedding-3-small`). |
+| `indexed_at` | `timestamptz` | Fecha y hora en que se genero el embedding. |
 
 ```sql
-CREATE TABLE public.document_types (
-    document_type_id uuid NOT NULL,
-    global_document_type_id uuid NOT NULL,
-    name character varying(100) NOT NULL,
-    acronym character varying(20) NOT NULL,
-    description text,
-    required_signature public.required_signature_enum,
-    is_active boolean DEFAULT true,
-    audit_data jsonb
+CREATE TABLE document_chunks (
+    id UUID NOT NULL DEFAULT gen_random_uuid(),
+    official_document_id UUID NOT NULL,
+    chunk_index INTEGER NOT NULL,
+    chunk_text TEXT NOT NULL,
+    embedding vector(1536),
+    embedding_model VARCHAR(100) NOT NULL DEFAULT 'text-embedding-3-small',
+    indexed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT document_chunks_pkey PRIMARY KEY (id),
+    CONSTRAINT document_chunks_official_fkey FOREIGN KEY (official_document_id)
+        REFERENCES official_documents (id),
+    CONSTRAINT document_chunks_unique UNIQUE (official_document_id, chunk_index)
 );
 ```
 
 ---
 
-## Tabla: `numeration_requests`
+## Tablas de Notas
 
-**Propósito:** Gestiona la reserva y confirmación de números oficiales para garantizar la secuencialidad y unicidad.
+Las notas son documentos oficiales con destinatarios (TO/CC/BCC) y tracking de lectura. El documento en si se almacena en `document_draft` / `official_documents` con tipo NOTA. Las siguientes tablas gestionan los destinatarios y el tracking.
 
-| Columna | Tipo de Dato | Descripción |
+### Tabla: `notes_recipients`
+
+**Proposito:** Define los sectores destinatarios de una nota oficial, con tipo de destinatario (TO, CC, BCC) y soporte para archivado.
+
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `numeration_requests_id` | `uuid` | **PK** - Identificador único de la solicitud de numeración. |
-| `document_type_id` | `uuid` | **FK** - Tipo de documento para el cual se solicita número. |
-| `user_id` | `uuid` | **FK** - Usuario que solicita la numeración (el numerador). |
-| `department_id` | `uuid` | **FK** - Departamento que emite el número. |
-| `year` | `smallint` | Año de la secuencia de numeración. |
-| `reserved_number` | `varchar` | Número secuencial reservado. |
-| `reserved_at` | `timestamp` | Fecha y hora de la reserva. |
-| `is_confirmed` | `boolean` | `true` si el número fue utilizado y confirmado. |
-| `confirmed_at` | `timestamp` | Fecha y hora de la confirmación. |
-| `validation_status` | `validation_status_enum` | Estado de la solicitud (pending, valid, invalid). |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `id` | `uuid` | **PK** - Identificador unico. |
+| `document_id` | `uuid` | **FK** - Documento de la nota (`document_draft`). |
+| `sector_id` | `uuid` | **FK** - Sector destinatario (`sectors`). |
+| `recipient_type` | `varchar(3)` | Tipo de destinatario: `TO`, `CC` o `BCC`. |
+| `sender_sector_id` | `uuid` | **FK** - Sector que envio la nota (`sectors`). |
+| `is_archived` | `boolean` | `true` si el destinatario archivo la nota. |
+| `archived_at` | `timestamptz` | Fecha y hora de archivado. |
 
 ```sql
-CREATE TABLE public.numeration_requests (
-    numeration_requests_id uuid NOT NULL,
-    document_type_id uuid NOT NULL,
-    user_id uuid NOT NULL,
-    department_id uuid NOT NULL,
-    year smallint NOT NULL,
-    reserved_number character varying(100) NOT NULL,
-    reserved_at timestamp without time zone NOT NULL,
-    is_confirmed boolean DEFAULT false NOT NULL,
-    confirmed_at timestamp without time zone,
-    validation_status public.validation_status_enum NOT NULL,
-    audit_data jsonb
+CREATE TABLE notes_recipients (
+    id UUID NOT NULL DEFAULT gen_random_uuid(),
+    document_id UUID NOT NULL,
+    sector_id UUID NOT NULL,
+    recipient_type VARCHAR(3) NOT NULL,
+    sender_sector_id UUID NOT NULL,
+    is_archived BOOLEAN NOT NULL DEFAULT false,
+    archived_at TIMESTAMPTZ NULL,
+    CONSTRAINT notes_recipients_pkey PRIMARY KEY (id),
+    CONSTRAINT notes_recipients_document_fkey FOREIGN KEY (document_id)
+        REFERENCES document_draft (id),
+    CONSTRAINT notes_recipients_type_check CHECK (recipient_type IN ('TO', 'CC', 'BCC')),
+    CONSTRAINT notes_recipients_unique UNIQUE (document_id, sector_id)
+);
+```
+
+### Tabla: `notes_openings`
+
+**Proposito:** Registra cuando un usuario abre/lee una nota recibida. Tracking simple de si/no leyo.
+
+| Columna | Tipo de Dato | Descripcion |
+|---|---|---|
+| `id` | `uuid` | **PK** - Identificador unico. |
+| `document_id` | `uuid` | **FK** - Documento de la nota (`document_draft`). |
+| `sector_id` | `uuid` | **FK** - Sector del usuario que abrio la nota (`sectors`). |
+| `user_id` | `uuid` | **FK** - Usuario que abrio la nota (`users`). |
+| `opened_at` | `timestamptz` | Fecha y hora de apertura. |
+
+```sql
+CREATE TABLE notes_openings (
+    id UUID NOT NULL DEFAULT gen_random_uuid(),
+    document_id UUID NOT NULL,
+    sector_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    opened_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT notes_openings_pkey PRIMARY KEY (id),
+    CONSTRAINT notes_openings_document_fkey FOREIGN KEY (document_id)
+        REFERENCES document_draft (id),
+    CONSTRAINT notes_openings_unique UNIQUE (document_id, user_id)
 );
 ```
 
@@ -211,10 +264,10 @@ CREATE TABLE public.numeration_requests (
 ```sql
 -- Estados posibles de un documento
 CREATE TYPE document_status AS ENUM (
-    'draft',        -- En edición
+    'draft',        -- En edicion
     'sent_to_sign', -- Enviado a firmar
     'signed',       -- Firmado completamente
-    'rejected'      -- Rechazado por algún firmante
+    'rejected'      -- Rechazado por algun firmante
 );
 
 -- Estados de firma individual
@@ -226,61 +279,45 @@ CREATE TYPE document_signer_status AS ENUM (
 
 -- Tipos de firma requerida
 CREATE TYPE required_signature_enum AS ENUM (
-    'electronic', -- Firma electrónica 
-    'digital'     -- Firma digital 
+    'electronic', -- Firma electronica
+    'digital'     -- Firma digital (PAdES)
 );
 
--- Estados de validación de numeración
+-- Estados de validacion de numeracion
 CREATE TYPE validation_status_enum AS ENUM (
-    'pending',  -- Pendiente de validación
+    'pending',  -- Pendiente de validacion
     'valid',    -- Validado y confirmado
     'invalid'   -- Invalidado
 );
 ```
 
-## Constraints e Índices Importantes
+## Indices Importantes
 
 ```sql
 -- Document Draft
-ALTER TABLE public.document_draft
-    ADD CONSTRAINT documents_pkey PRIMARY KEY (document_id),
-    ADD CONSTRAINT fk_document_type FOREIGN KEY (document_type_id) 
-        REFERENCES public.document_types(document_type_id),
-    ADD CONSTRAINT fk_created_by FOREIGN KEY (created_by) 
-        REFERENCES auth.users(id),
-    ADD CONSTRAINT fk_sent_by FOREIGN KEY (sent_by) 
-        REFERENCES auth.users(id);
+CREATE INDEX idx_document_draft_created_by ON document_draft(created_by);
+CREATE INDEX idx_document_draft_type ON document_draft(document_type_id);
+CREATE INDEX idx_document_draft_created_by_at ON document_draft(created_by, created_at DESC);
 
 -- Document Signers
-ALTER TABLE public.document_signers
-    ADD CONSTRAINT document_signers_pkey PRIMARY KEY (document_signer_id),
-    ADD CONSTRAINT unique_signer_per_document UNIQUE (document_id, user_id),
-    ADD CONSTRAINT fk_document FOREIGN KEY (document_id) 
-        REFERENCES public.document_draft(document_id),
-    ADD CONSTRAINT fk_user FOREIGN KEY (user_id) 
-        REFERENCES auth.users(id);
+CREATE INDEX idx_doc_signers_doc ON document_signers(document_id);
+CREATE INDEX idx_doc_signers_user ON document_signers(user_id);
+CREATE INDEX idx_doc_signers_status ON document_signers(status);
 
-CREATE INDEX idx_doc_signers_doc_user ON public.document_signers(document_id, user_id);
-CREATE INDEX ix_doc_signers_doc ON public.document_signers(document_id);
-CREATE INDEX ix_doc_signers_user ON public.document_signers(user_id);
-```
+-- Official Documents
+CREATE INDEX idx_official_docs_number ON official_documents(official_number);
+CREATE INDEX idx_official_docs_signed_at ON official_documents(signed_at DESC);
+CREATE INDEX idx_official_docs_department ON official_documents(department_id);
+CREATE INDEX idx_official_docs_signer_sectors ON official_documents
+    USING GIN (signer_sector_ids);
 
-## Triggers Principales
-
-```sql
--- Proteger campos críticos en documentos enviados a firma
-CREATE TRIGGER protect_draft_fields
-    BEFORE UPDATE ON document_draft
-    FOR EACH ROW
-    WHEN (OLD.status = 'sent_to_sign')
-    EXECUTE FUNCTION fn_protect_draft_fields();
-
--- Actualizar estado de documento al completar firmas
-CREATE TRIGGER update_document_status
-    AFTER UPDATE ON document_signers
-    FOR EACH ROW
-    WHEN (NEW.status = 'signed')
-    EXECUTE FUNCTION fn_check_all_signatures();
+-- Notes
+CREATE INDEX idx_notes_recipients_document ON notes_recipients(document_id);
+CREATE INDEX idx_notes_recipients_sector ON notes_recipients(sector_id);
+CREATE INDEX idx_notes_recipients_sender ON notes_recipients(sender_sector_id);
+CREATE INDEX idx_notes_recipients_not_archived ON notes_recipients(sector_id)
+    WHERE is_archived = false;
+CREATE INDEX idx_notes_openings_document ON notes_openings(document_id);
 ```
 
 ## Estructura JSON de Contenido
@@ -290,13 +327,13 @@ CREATE TRIGGER update_document_status
 {
   "version": "1.0",
   "template": "template_id",
-  "title": "Título del documento",
+  "title": "Titulo del documento",
   "body": {
     "sections": [
       {
         "id": "section1",
         "type": "text|table|list",
-        "content": "Contenido de la sección"
+        "content": "Contenido de la seccion"
       }
     ]
   },
@@ -307,7 +344,7 @@ CREATE TRIGGER update_document_status
 }
 ```
 
-### Datos de Auditoría (`audit_data`)
+### Datos de Auditoria (`audit_data`)
 ```json
 {
   "created": {
@@ -325,5 +362,3 @@ CREATE TRIGGER update_document_status
   ]
 }
 ```
-
-

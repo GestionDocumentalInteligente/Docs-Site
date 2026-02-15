@@ -8,14 +8,14 @@ Este documento detalla la estructura de las tablas que gestionan el control de a
 
 ### Tabla: `roles`
 
-**Propósito:** Define los roles funcionales que se pueden asignar a los usuarios (ej. Administrador, Agente, Gestor).
+**Proposito:** Define los roles funcionales que se pueden asignar a los usuarios (ej. Administrador, Agente, Gestor).
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `role_id` | `uuid` | **PK** - Identificador único del rol. |
-| `role_name` | `varchar` | Nombre único del rol. |
-| `description` | `text` | Descripción de las responsabilidades del rol. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `role_id` | `uuid` | **PK** - Identificador unico del rol. |
+| `role_name` | `varchar` | Nombre unico del rol. |
+| `description` | `text` | Descripcion de las responsabilidades del rol. |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
 CREATE TABLE public.roles (
@@ -30,14 +30,14 @@ CREATE TABLE public.roles (
 
 ### Tabla: `permissions`
 
-**Propósito:** Catálogo de todos los permisos o acciones específicas que se pueden realizar en el sistema.
+**Proposito:** Catalogo de todos los permisos o acciones especificas que se pueden realizar en el sistema.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `permission_id` | `uuid` | **PK** - Identificador único del permiso. |
-| `name` | `varchar` | Nombre único del permiso (ej. "CREATE_DOCUMENT"). |
-| `description` | `text` | Descripción de lo que permite la acción. |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `permission_id` | `uuid` | **PK** - Identificador unico del permiso. |
+| `name` | `varchar` | Nombre unico del permiso (ej. "CREATE_DOCUMENT"). |
+| `description` | `text` | Descripcion de lo que permite la accion. |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
 CREATE TABLE public.permissions (
@@ -52,13 +52,13 @@ CREATE TABLE public.permissions (
 
 ### Tabla: `role_permissions`
 
-**Propósito:** Tabla de unión que asigna permisos específicos a cada rol, definiendo lo que cada rol puede hacer.
+**Proposito:** Tabla de union que asigna permisos especificos a cada rol, definiendo lo que cada rol puede hacer.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
 | `role_id` | `uuid` | **PK, FK** - Referencia al rol (`roles`). |
 | `permission_id` | `uuid` | **PK, FK** - Referencia al permiso (`permissions`). |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
 CREATE TABLE public.role_permissions (
@@ -72,13 +72,13 @@ CREATE TABLE public.role_permissions (
 
 ### Tabla: `user_roles`
 
-**Propósito:** Tabla de unión que asigna uno o más roles a cada usuario.
+**Proposito:** Tabla de union que asigna uno o mas roles a cada usuario.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
 | `user_id` | `uuid` | **PK, FK** - Referencia al usuario (`users`). |
 | `role_id` | `uuid` | **PK, FK** - Referencia al rol (`roles`). |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
 CREATE TABLE public.user_roles (
@@ -92,17 +92,17 @@ CREATE TABLE public.user_roles (
 
 ### Tabla: `enabled_document_types_by_department`
 
-**Propósito:** Habilita qué tipos de documentos puede crear o gestionar cada repartición. Es una regla de negocio clave.
+**Proposito:** Habilita que tipos de documentos puede crear o gestionar cada reparticion. Es una regla de negocio clave.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `id` | `integer` | **PK** - Identificador único de la regla. |
+| `id` | `integer` | **PK** - Identificador unico de la regla. |
 | `document_type_id` | `uuid` | **FK** - Referencia al tipo de documento (`document_types`). |
-| `department_id` | `uuid` | **FK** - Referencia a la repartición (`departments`). |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `department_id` | `uuid` | **FK** - Referencia a la reparticion (`departments`). |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
-CREATE TABLE public.enabled_document_types_by_department (
+CREATE TABLE enabled_document_types_by_department (
     id integer NOT NULL,
     document_type_id uuid NOT NULL,
     department_id uuid NOT NULL,
@@ -114,17 +114,17 @@ CREATE TABLE public.enabled_document_types_by_department (
 
 ### Tabla: `document_types_allowed_by_rank`
 
-**Propósito:** Define qué jerarquía o rango (`rank`) es necesario para poder firmar ciertos tipos de documento.
+**Proposito:** Define que jerarquia o rango (`rank`) es necesario para poder firmar ciertos tipos de documento.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `id` | `integer` | **PK** - Identificador único de la regla. |
+| `id` | `integer` | **PK** - Identificador unico de la regla. |
 | `document_type_id` | `uuid` | **FK** - Referencia al tipo de documento (`document_types`). |
 | `rank_id` | `uuid` | **FK** - Referencia al rango (`ranks`). |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
+| `audit_data` | `jsonb` | Metadatos de auditoria. |
 
 ```sql
-CREATE TABLE public.document_types_allowed_by_rank (
+CREATE TABLE document_types_allowed_by_rank (
     id integer NOT NULL,
     document_type_id uuid NOT NULL,
     rank_id uuid NOT NULL,
@@ -134,94 +134,30 @@ CREATE TABLE public.document_types_allowed_by_rank (
 
 ---
 
-### Tabla: `user_sector_permissions`
-
-**Propósito:** Otorga permisos especiales a un usuario sobre un sector específico, más allá de los permisos de su rol.
-
-| Columna | Tipo de Dato | Descripción |
-|---|---|---|
-| `user_id` | `uuid` | **PK, FK** - Referencia al usuario (`users`). |
-| `sector_id` | `uuid` | **PK, FK** - Referencia al sector (`sectors`). |
-| `audit_data` | `jsonb` | Metadatos de auditoría. |
-
-```sql
-CREATE TABLE public.user_sector_permissions (
-    user_id uuid NOT NULL,
-    sector_id uuid NOT NULL,
-    audit_data jsonb
-);
-```
-
----
-
 ## Sistema de Sellos Institucionales
 
-### Tabla: `global_seals`
-
-**Propósito:** Catálogo universal de sellos estándar (ej. "Intendente", "Secretario") que pueden ser usados por cualquier municipio.
-
-| Columna | Tipo de Dato | Descripción |
-|---|---|---|
-| `id` | `uuid` | **PK** - Identificador único del sello global. |
-| `acronym` | `text` | Sigla única del sello (ej. "INTEN"). |
-| `name` | `text` | Nombre descriptivo del sello (ej. "Intendente Municipal"). |
-| `description` | `text` | Descripción funcional del sello. |
-| `created_at` | `timestamp` | Fecha de creación del registro. |
-
-```sql
-CREATE TABLE public.global_seals (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    acronym text NOT NULL,
-    name text NOT NULL,
-    description text,
-    created_at timestamp without time zone DEFAULT now()
-);
-```
-
----
+Los sellos son per-tenant (viven en el schema del municipio). Ya no existen `global_seals` ni `rank_seals`.
 
 ### Tabla: `city_seals`
 
-**Propósito:** Implementación de un sello para un municipio específico, que puede heredar de un sello global o ser totalmente personalizado.
+**Proposito:** Define los sellos institucionales disponibles para un municipio. Cada sello puede estar vinculado a un rango jerarquico.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `id` | `uuid` | **PK** - Identificador único del sello municipal. |
-| `global_seal_id` | `uuid` | **FK** - Referencia opcional a `global_seals`. |
-| `acronym` | `text` | Sigla única del sello en el municipio. |
-| `name` | `text` | Nombre del sello para el municipio. |
-| `description` | `text` | Descripción local del sello. |
-| `created_at` | `timestamp` | Fecha de creación del registro. |
+| `id` | `uuid` | **PK** - Identificador unico del sello municipal. |
+| `acronym` | `text` | Sigla unica del sello en el municipio (ej. "INTEN"). |
+| `name` | `text` | Nombre del sello para el municipio (ej. "Intendente Municipal"). |
+| `description` | `text` | Descripcion local del sello. |
+| `rank_id` | `uuid` | **FK** - Referencia opcional al rango (`ranks`). |
+| `created_at` | `timestamp` | Fecha de creacion del registro. |
 
 ```sql
-CREATE TABLE public.city_seals (
+CREATE TABLE city_seals (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    global_seal_id uuid,
     acronym text NOT NULL,
     name text NOT NULL,
     description text,
-    created_at timestamp without time zone DEFAULT now()
-);
-```
-
----
-
-### Tabla: `rank_allowed_seals`
-
-**Propósito:** Define qué rangos jerárquicos (`ranks`) están autorizados para utilizar un determinado sello municipal.
-
-| Columna | Tipo de Dato | Descripción |
-|---|---|---|
-| `id` | `uuid` | **PK** - Identificador único de la regla. |
-| `rank_id` | `uuid` | **FK** - Referencia al rango (`ranks`). |
-| `city_seal_id` | `uuid` | **FK** - Referencia al sello municipal (`city_seals`). |
-| `created_at` | `timestamp` | Fecha de creación del registro. |
-
-```sql
-CREATE TABLE public.rank_allowed_seals (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    rank_id uuid NOT NULL,
-    city_seal_id uuid NOT NULL,
+    rank_id uuid REFERENCES ranks(rank_id),
     created_at timestamp without time zone DEFAULT now()
 );
 ```
@@ -230,20 +166,20 @@ CREATE TABLE public.rank_allowed_seals (
 
 ### Tabla: `user_seals`
 
-**Propósito:** Asigna un sello municipal específico a un usuario individual, permitiéndole usarlo en sus firmas.
+**Proposito:** Asigna un sello municipal especifico a un usuario individual, permitiendole usarlo en sus firmas. Cada usuario puede tener un solo sello.
 
-| Columna | Tipo de Dato | Descripción |
+| Columna | Tipo de Dato | Descripcion |
 |---|---|---|
-| `id` | `uuid` | **PK** - Identificador único de la asignación. |
-| `user_id` | `uuid` | **FK** - Referencia al usuario (`users`). |
-| `city_seal_id` | `uuid` | **FK** - Referencia al sello municipal (`city_seals`). |
-| `created_at` | `timestamp` | Fecha de creación del registro. |
+| `id` | `uuid` | **PK** - Identificador unico de la asignacion. |
+| `user_id` | `uuid` | **FK** - Referencia al usuario (`users`). Unico. |
+| `seal_id` | `uuid` | **FK** - Referencia al sello municipal (`city_seals`). |
+| `created_at` | `timestamp` | Fecha de creacion del registro. |
 
 ```sql
-CREATE TABLE public.user_seals (
+CREATE TABLE user_seals (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    user_id uuid NOT NULL,
-    city_seal_id uuid NOT NULL,
+    user_id uuid NOT NULL UNIQUE,
+    seal_id uuid NOT NULL REFERENCES city_seals(id),
     created_at timestamp without time zone DEFAULT now()
 );
 ```

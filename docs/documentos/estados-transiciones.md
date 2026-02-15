@@ -27,7 +27,6 @@ CREATE TYPE document_signer_status AS ENUM (
 );
 ```
 
-![Estados Principales](../images/estados-principales-documento.png)
 
 ---
 
@@ -62,7 +61,6 @@ La siguiente imagen resume cómo cambia la presentación visual del encabezado d
 
 ![Evolución de estados de encabezados](../assets/images/docs/Evolución_estados_encabezados.png)
 
-![Diagrama Estados Completo](../images/diagrama-estados-completo.png)
 
 ---
 
@@ -112,7 +110,6 @@ CHECK (pad_id IS NOT NULL AND pad_id != '')
 | `draft` → `sent_to_sign` | Usuario envía a firmas | • Contenido no vacío<br>• Al menos un firmante<br>• Numerador asignado |
 | `draft` → `deleted` | Eliminación lógica | • Solo el creador<br>• Sin firmantes asignados |
 
-![Estado Draft](../images/estado-draft-detalle.png)
 
 ---
 
@@ -186,7 +183,6 @@ WHERE ds.document_id = ?
 | `sent_to_sign` → `rejected` | Cualquier firmante rechaza | • Al menos un firmante rejected<br>• Motivo registrado |
 | `sent_to_sign` → `cancelled` | Cancelación administrativa | • Autorización especial<br>• Proceso no completado |
 
-![Estado Sent to Sign](../images/estado-sent-to-sign-detalle.png)
 
 ---
 
@@ -246,7 +242,6 @@ ORDER BY dr.rejected_at DESC;
 | `rejected` → `draft` | Iniciar corrección | • Usuario autorizado<br>• Motivos revisados |
 | `rejected` → `cancelled` | Cancelar definitivamente | • Autorización especial |
 
-![Estado Rejected](../images/estado-rejected-detalle.png)
 
 ---
 
@@ -322,13 +317,22 @@ JOIN users u ON od.numerator_id = u.user_id
 WHERE dd.document_id = ?;
 ```
 
+### Firma Digital y Almacenamiento
+
+- ✅ **Firma digital**: Aplicada por GDI-Notary (:8001) con pyHanko (PAdES/CAdES)
+- ✅ **Firma visual**: Logo institucional, fecha, numero oficial y nombre del firmante en el PDF
+- ✅ **Multi-firmante secuencial**: Cada firmante firma en orden segun `signing_order`
+- ✅ **PDF generado**: Via GDI-PDFComposer (:8002) con Gotenberg (headless Chrome)
+- ✅ **Almacenamiento**: PDF oficial en bucket `oficial` de Cloudflare R2
+- ✅ **Descarga segura**: Via URLs firmadas temporales
+
 ### Funcionalidades Habilitadas
 
 - ✅ **Descarga PDF oficial**
-- ✅ **Búsqueda por número oficial**  
-- ✅ **Vinculación automática a expediente**
-- ✅ **Inclusión en reportes oficiales**
-- ✅ **Consulta pública** (según permisos)
+- ✅ **Busqueda por numero oficial**
+- ✅ **Vinculacion automatica a expediente**
+- ✅ **Inclusion en reportes oficiales**
+- ✅ **Consulta publica** (segun permisos)
 
 ### Transiciones Permitidas DESDE `signed`
 
@@ -336,7 +340,6 @@ WHERE dd.document_id = ?;
 |------------|---------|-------|
 | `signed` → `archived` | Proceso de archivo | • Después de período de vigencia<br>• Mantiene validez legal |
 
-![Estado Signed](../images/estado-signed-detalle.png)
 
 ---
 
@@ -384,7 +387,6 @@ WHERE document_id = ?;
 |------------|---------|-------|
 | `cancelled` → `archived` | Proceso de archivo | • Solo para limpieza<br>• Mantiene historia |
 
-![Estado Cancelled](../images/estado-cancelled-detalle.png)
 
 ---
 
@@ -420,7 +422,6 @@ WHERE status = 'signed'
 
 **Ninguna** - Estado final del documento.
 
-![Estado Archived](../images/estado-archived-detalle.png)
 
 ---
 
@@ -464,7 +465,6 @@ SELECT *,
 FROM document_draft;
 ```
 
-![Eliminación Lógica](../images/eliminacion-logica-detalle.png)
 
 ---
 
@@ -530,7 +530,6 @@ CREATE TRIGGER validate_document_status_change
     EXECUTE FUNCTION check_valid_transition();
 ```
 
-![Validaciones Transición](../images/validaciones-transicion.png)
 
 ---
 
@@ -589,7 +588,6 @@ GROUP BY dt.name
 ORDER BY success_rate DESC;
 ```
 
-![Métricas Estados](../images/metricas-estados.png)
 
 ---
 
@@ -623,7 +621,6 @@ sent_to_sign → rejected → draft → sent_to_sign → signed
    cancelled   cancelled   cancelled
 ```
 
-![Flujo Completo Estados](../images/flujo-completo-estados.png)
 
 ---
 

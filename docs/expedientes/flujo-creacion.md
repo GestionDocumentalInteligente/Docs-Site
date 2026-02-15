@@ -2,7 +2,7 @@
 
 El proceso de creación de un expediente en GDI está diseñado para ser intuitivo y guiar al usuario a través de los pasos necesarios para iniciar un nuevo trámite. Este flujo establece la base del expediente, generando su carátula y asignando los datos iniciales.
 
-## 3.1 Inicio y Configuración (Tipo, Motivo, Iniciador)
+## Inicio y Configuracion (Tipo, Motivo, Iniciador)
 
 🎨 **Flujo en Figma:** [Crear expediente](https://www.figma.com/design/QfYxAIYk97ZzvIU411ryLh/GDI---Expedientes?node-id=6802-17580&t=xkPc1JncRGCA4nzR-4)
 
@@ -12,7 +12,6 @@ El usuario inicia el proceso seleccionando el Tipo de Expediente desde un catál
 
 > Para más detalles sobre cómo se configuran los Tipos de expedientes, ver sección: Backoffice – Configuración de Expedientes.
 
-![Modal Crear Expediente](../assets/images/exp/modal_crear_expediente.png)
 
 ### 1. Selección del Tipo de Expediente
 
@@ -46,7 +45,7 @@ El usuario define el Tipo de Inicio del expediente (campo Tab selector), selecci
 
 Los campos Nro de Identificación Fiscal (CUIT, CUIL) del solicitante y Nombre o Razón Social del Iniciador no se solicitan al usuario, ya que la información del iniciador se obtiene directamente del usuario interno que caratula.
 
-## 3.2 Generación Automática de Carátula (con firma automática)
+## Generacion Automatica de Caratula (con firma automatica)
 
 🎨 **Flujo en Figma:** [Generación de Carátula](https://www.figma.com/design/QfYxAIYk97ZzvIU411ryLh/GDI---Expedientes?node-id=7202-8421&t=xkPc1JncRGCA4nzR-4)
 
@@ -64,7 +63,6 @@ Al crear un expediente, el sistema genera automáticamente una carátula tipo do
 4. **Firma automática**: Inclusión de la firma digital del usuario creador sin intervención manual
 5. **Persistencia**: Almacenamiento del expediente y carátula en el sistema
 
-![Ejemplo Carátula Completa](../assets/images/exp/ejemplo_caratula_completa.png)
 
 ### Información generada automáticamente en la Carátula:
 

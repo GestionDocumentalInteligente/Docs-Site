@@ -1,8 +1,8 @@
-# Configuración de Documentos
+# Configuracion de Documentos
 
-## 1. Propósito y Objetivos Clave
+## 1. Proposito y Objetivos Clave
 
-La Configuración de Documentos permite a los Administradores definir y personalizar los parámetros fundamentales para la creación, gestión y formalización de documentos electrónicos dentro del sistema GDI. El objetivo es asegurar que cada documento cumpla con las normativas y requisitos específicos definidos por la municipalidad.
+La seccion de Configuracion de Documentos del Backoffice permite a los Administradores definir y personalizar los tipos de documentos electronicos disponibles en el sistema GDI. Cada tipo de documento se configura como un objeto `DocumentTypeDefinition` que determina su identidad, comportamiento, permisos de firma y metodo de validacion legal.
 
 ### Objetivos principales:
 
@@ -146,9 +146,9 @@ La configuración del tipo de firma es crucial para determinar la validez legal 
 | Digital solo numerador | Alta | Media | Disposiciones, Dictámenes, Pliegos (responsabilidad legal en una autoridad) | Solo el último firmante (Numerador) usa certificado digital; los demás usan credenciales GDI |
 | Electrónica todos | Media | Baja | Comunicaciones, informes, documentos operativos | Firma con credenciales GDI para todos los firmantes |
 
-## 6. Relación con la Base de Datos
+## 6. Relacion con la Base de Datos
 
-Las definiciones de tipos de documento configuradas en el Backoffice se persisten en la base de datos, principalmente en la tabla `Documentos` (o tablas relacionadas como `TiposDocumento` si existe una tabla específica para la definición de tipos). Cada parámetro (`tipo_documento`, `acronimo`, `nombre_documento`, `descripcion`, `habilitado_en`, `reparticiones_especificas`, `tipo_firma`, `ultimo_numero_papel`) corresponde a un campo o conjunto de campos dentro de estas tablas, asegurando la integridad y persistencia de la configuración. Para más detalles sobre la estructura de la base de datos, consulte la documentación en `06-DataBase/Documentos.md`.
+Las definiciones de tipos de documento configuradas en el Backoffice se persisten en la tabla `document_types` de la base de datos. Cada parametro (`tipo_documento`, `acronimo`, `nombre_documento`, `descripcion`, `habilitado_en`, `reparticiones_especificas`, `tipo_firma`, `ultimo_numero_papel`) corresponde a un campo o conjunto de campos dentro de esta tabla. Las relaciones con reparticiones se gestionan mediante `enabled_document_types_by_department` y `document_types_allowed_by_rank`. Para mas detalles sobre la estructura de la base de datos, consulte la seccion de **Base de Datos**.
 
 ## 7. Impacto en el Sistema y Validaciones
 

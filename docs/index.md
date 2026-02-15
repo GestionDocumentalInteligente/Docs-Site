@@ -1,19 +1,19 @@
-# Bienvenido a GDI Docs
+# GDI - Gestion Documental Inteligente
 
-**Documentación oficial del Framework GDI - Gestión Documental Inteligente**
+**Documentacion oficial de GDI, el sistema de gestion documental inteligente para gobiernos de America Latina.**
 
 ---
 
-## ¿Qué es GDI?
+## Que es GDI?
 
-**GDI (Gestión Documental Inteligente)** es la evolución natural del GDE (Gestión Documental Electrónica), diseñada bajo su normativa y optimizada específicamente para el ámbito municipal. Es una plataforma **open source** integral que transforma los procesos administrativos rígidos en flujos de trabajo dinámicos, flexibles y colaborativos.
+**GDI (Gestion Documental Inteligente)** es una plataforma open source que digitaliza y moderniza la gestion documental de organismos publicos en America Latina. Transforma procesos administrativos rigidos en flujos de trabajo dinamicos, flexibles y colaborativos, eliminando burocracia y reduciendo drasticamente los tiempos de procesamiento.
 
 !!! info "Objetivo Principal"
-    Eliminar la burocracia y reducir drásticamente los tiempos de procesamiento en la gestión documental municipal.
+    Proveer a gobiernos LATAM de una herramienta moderna, abierta y soberana para gestionar documentos, expedientes y procesos administrativos con inteligencia artificial integrada.
 
 ---
 
-## Características Principales
+## Caracteristicas Principales
 
 <div class="grid cards" markdown>
 
@@ -21,101 +21,115 @@
 
     ---
 
-    Diseñado con un modelo API-first y basado en estándares abiertos para máxima interoperabilidad.
+    Arquitectura basada en APIs REST y estandares abiertos para maxima interoperabilidad entre sistemas.
 
--   :material-account-group:{ .lg .middle } __UX Optimizada__
-
-    ---
-
-    Interfaces meticulosamente diseñadas siguiendo los últimos estándares UI/UX para máxima productividad.
-
--   :material-cash-multiple:{ .lg .middle } __Zero Costos de Licencia__
+-   :material-open-source-initiative:{ .lg .middle } __Open Source (AGPLv3)__
 
     ---
 
-    Software libre (AGPLv3) que elimina costos de licencias propietarias.
+    Software libre que elimina costos de licencias, garantiza soberania tecnologica y evita vendor lock-in.
 
--   :material-scale-balance:{ .lg .middle } __Escalable__
-
-    ---
-
-    Arquitectura modular y distribuida que se adapta a municipios de cualquier tamaño.
-
--   :material-shield-lock:{ .lg .middle } __Soberanía Tecnológica__
+-   :material-account-multiple:{ .lg .middle } __Multi-Tenant__
 
     ---
 
-    Código abierto que garantiza control total y elimina el vendor lock-in.
+    Schemas separados por organizacion en PostgreSQL. Una instancia sirve a multiples entidades de forma aislada.
+
+-   :material-robot:{ .lg .middle } __IA Integrada (RAG)__
+
+    ---
+
+    Agente de IA con busqueda semantica (RAG) para asistencia de redaccion, clasificacion y consulta de expedientes.
+
+-   :material-file-certificate:{ .lg .middle } __Firma Digital PAdES__
+
+    ---
+
+    Firma digital con plena validez juridica sobre documentos PDF, compatible con estandares internacionales.
 
 -   :material-map-marker-path:{ .lg .middle } __LATAM-First__
 
     ---
 
-    Diseñado específicamente para las necesidades de América Latina.
+    Disenado especificamente para las necesidades regulatorias y operativas de America Latina.
 
 </div>
 
 ---
 
-## Módulos del Sistema
+## Modulos del Sistema
 
-### 📄 Documentos
-El corazón de la gestión documental: creación, colaboración y formalización de documentos electrónicos con plena validez legal.
+### Documentos
+Creacion, colaboracion y formalizacion de documentos electronicos con plena validez legal. Ciclo de vida completo desde borrador hasta archivo definitivo.
 
-[Explorar Documentos →](documentos/introduccion-casos-uso.md){ .md-button }
-
----
-
-### 📁 Expedientes
-Contenedor digital para la gestión integral de trámites y procesos administrativos con trazabilidad completa.
-
-[Explorar Expedientes →](expedientes/casos-uso.md){ .md-button }
+[Explorar Documentos](documentos/introduccion-casos-uso.md){ .md-button }
 
 ---
 
-### 🏛️ Organigrama
-Administración centralizada de usuarios, roles, reparticiones y jerarquía organizacional.
+### Expedientes
+Contenedor digital para la gestion integral de tramites y procesos administrativos con trazabilidad completa y movimientos entre areas.
 
-[Explorar Organigrama →](organigrama/intro-caso-uso.md){ .md-button }
-
----
-
-### ⚙️ Backoffice
-Panel de configuración avanzada para administradores del sistema.
-
-[Explorar Backoffice →](backoffice/introduccion-acceso.md){ .md-button }
+[Explorar Expedientes](expedientes/casos-uso.md){ .md-button }
 
 ---
 
-### 🗄️ Base de Datos
-Estructura de datos completa y modelo relacional del sistema.
+### Notas
+Sistema de comunicaciones internas entre usuarios y sectores, con destinatarios, estados y trazabilidad.
 
-[Explorar Base de Datos →](database/readme.md){ .md-button }
+[Explorar Notas](notas/introduccion.md){ .md-button }
+
+---
+
+### BackOffice
+Panel de administracion y configuracion del sistema: tipos de documento, tipos de expediente, organigrama, roles, permisos y API keys.
+
+[Explorar BackOffice](backoffice/introduccion-acceso.md){ .md-button }
+
+---
+
+### Base de Datos
+Modelo relacional completo del sistema, estructura de schemas multi-tenant y configuracion de almacenamiento.
+
+[Explorar Base de Datos](database/readme.md){ .md-button }
+
+---
+
+## Stack Tecnologico
+
+| Capa | Tecnologias |
+|------|-------------|
+| **Frontend** | Next.js 15, React 18, TypeScript, Tailwind CSS, shadcn/ui |
+| **Backend** | FastAPI, SQLAlchemy async, Pydantic v2, Auth0 JWT |
+| **Base de Datos** | PostgreSQL 17 + pgvector |
+| **IA** | LangGraph, OpenRouter, RAG con pgvector |
+| **Firma Digital** | pyHanko, PyMuPDF (PAdES) |
+| **Almacenamiento** | Cloudflare R2 (S3-compatible) |
+| **Infraestructura** | Railway (PaaS) |
 
 ---
 
 ## Comenzar a Explorar
 
 !!! tip "Para nuevos integrantes"
-    Recomendamos empezar por la [Visión General](introduccion-vision/vision-general.md) para comprender la arquitectura completa del sistema.
+    Recomendamos empezar por la [Vision General](introduccion-vision/vision-general.md) para comprender el sistema completo.
 
 !!! example "Para desarrolladores"
-    Consulta el [Modelo de Datos](database/readme.md) y la [Arquitectura de la Solución](introduccion-vision/arquitectura-solucion-gdi.md).
+    Consulta la [Arquitectura de la Solucion](introduccion-vision/arquitectura-solucion-gdi.md) y el [Modelo de Datos](database/readme.md).
 
-!!! question "¿Términos desconocidos?"
-    Revisa nuestro [Glosario](glosario.md) completo de términos técnicos.
+!!! question "Terminos desconocidos?"
+    Revisa nuestro [Glosario](glosario.md) completo de terminos tecnicos.
 
 ---
 
 ## Audiencia
 
-Esta documentación está dirigida a:
+Esta documentacion esta dirigida a:
 
-- 👨‍💻 Desarrolladores de software (nuevos y existentes)
-- 🧪 Ingenieros de QA (Quality Assurance)
-- 🏗️ Arquitectos de software
-- 👔 Líderes técnicos
-- 🤖 Sistemas de Inteligencia Artificial
+- Desarrolladores de software (nuevos y existentes)
+- Ingenieros de QA
+- Arquitectos de software
+- Lideres tecnicos
+- Sistemas de Inteligencia Artificial
 
 ---
 
@@ -127,4 +141,4 @@ GDI es un proyecto **open source** bajo licencia AGPLv3.
 
 ---
 
-<small>Copyright © 2025 GDI Latam - Gestión Documental Inteligente</small>
+<small>Copyright &copy; 2026 GDI Latam - Gestion Documental Inteligente</small>

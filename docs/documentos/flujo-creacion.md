@@ -198,10 +198,11 @@ INSERT INTO document_signers (
 ![Botón Previsualizar](../assets/images/docs/boton_previsualizacion%20(2).png)
 
 **Proceso**:
-1. Validación de contenido obligatorio
-2. Verificación de firmantes asignados
-3. Generación de PDF temporal con encabezado provisional
-4. Aplicación de marca de agua "PREVISUALIZACIÓN"
+1. Validacion de contenido obligatorio
+2. Verificacion de firmantes asignados
+3. Generacion de PDF temporal via GDI-PDFComposer (:8002) con Gotenberg (headless Chrome)
+4. Aplicacion de marca de agua "BORRADOR"
+5. Almacenamiento del preview en bucket `tosign` de Cloudflare R2
 
 ![Vista Previa PDF](../assets/images/docs/vista_previa_pdf.png)
 
@@ -243,7 +244,7 @@ WHERE document_id = ?;
 
 **Efectos Inmediatos**:
 - ✅ Contenido se vuelve **inmutable**
-- ✅ Aparece encabezado provisional (sin marca "PREVISUALIZACIÓN")
+- ✅ Aparece encabezado provisional (sin marca "BORRADOR")
 - ✅ Firmantes reciben notificaciones
 - ✅ Documento aparece en paneles de firmantes
 
@@ -337,7 +338,12 @@ WHERE document_id = ?;
 
 #### A. Reserva de Número
 
+El sistema utiliza un **advisory lock (888888)** y una **global_sequence compartida** entre todos los tipos de documento para garantizar la secuencialidad y prevenir race conditions.
+
 ```sql
+-- Advisory lock para prevenir race conditions
+SELECT pg_advisory_lock(888888);
+
 INSERT INTO numeration_requests (
     document_type_id,
     user_id,
@@ -351,10 +357,12 @@ INSERT INTO numeration_requests (
     ?, -- numerador
     ?, -- department
     EXTRACT(YEAR FROM NOW()),
-    ?, -- número generado secuencialmente
+    ?, -- número de global_sequence
     NOW(),
     'pending'
 );
+
+SELECT pg_advisory_unlock(888888);
 ```
 
 #### B. Generación de Número Oficial
@@ -436,9 +444,11 @@ COMMIT;
 
 ### 6.2 Cambios Instantáneos Post-Firma
 
-- ✅ **Número oficial**: Asignado permanentemente
+- ✅ **Numero oficial**: Asignado permanentemente
 - ✅ **Fecha oficial**: Timestamp exacto de firma del numerador
-- ✅ **PDF firmado**: Generado y almacenado en `signed_pdf_url`
+- ✅ **PDF firmado**: Generado por GDI-PDFComposer (:8002) y firmado digitalmente por GDI-Notary (:8001) con pyHanko (PAdES/CAdES)
+- ✅ **Firma visual**: Logo institucional, fecha, numero oficial y nombre del firmante estampados en el PDF
+- ✅ **Almacenamiento**: PDF oficial guardado en bucket `oficial` de Cloudflare R2, accesible via URLs firmadas
 - ✅ **Encabezado definitivo**: Sin marcas de agua, con datos oficiales
 
 ### 6.3 Funcionalidades Habilitadas

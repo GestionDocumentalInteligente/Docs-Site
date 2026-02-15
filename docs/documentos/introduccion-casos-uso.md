@@ -127,15 +127,16 @@ CREATE TABLE public.document_rejections (
 
 ### 2. Proceso de Firma Secuencial
 
-**Actor**: Firmantes asignados  
-**Objetivo**: Formalizar documento con firmas ordenadas
+**Actor**: Firmantes asignados
+**Objetivo**: Formalizar documento con firmas digitales ordenadas
 
 **Flujo**:
 1. Documento llega con estado `sent_to_sign`
-2. Firmante revisa contenido (solo lectura)
-3. Decide: Firmar ✅ o Rechazar ❌
-4. Si rechaza: ingresa motivo detallado
-5. Sistema progresa al siguiente firmante o finaliza
+2. Firmante revisa contenido y preview con marca de agua "BORRADOR"
+3. Decide: Firmar o Rechazar
+4. Si firma: GDI-Notary (:8001) aplica firma digital (pyHanko PAdES/CAdES) con firma visual
+5. Si rechaza: ingresa observaciones, documento vuelve a `draft` (historial en `document_rejections`)
+6. Sistema progresa al siguiente firmante segun `signing_order`
 
 **Resultado**: Documento `signed` o `rejected`
 
@@ -153,30 +154,32 @@ CREATE TABLE public.document_rejections (
 
 **Resultado**: Nueva versión mejorada del documento
 
-### 4. Numeración y Oficialización
+### 4. Numeracion y Oficializacion
 
-**Actor**: Numerador (último firmante)  
-**Objetivo**: Asignar número oficial y finalizar
+**Actor**: Numerador (ultimo firmante)
+**Objetivo**: Asignar numero oficial y finalizar
 
 **Flujo**:
-1. Recibe documento para numeración final
-2. Sistema reserva número en `numeration_requests`
-3. Firma y confirma numeración
-4. Genera `official_documents` entry
-5. Crea PDF firmado oficial
+1. Recibe documento para numeracion final
+2. Sistema reserva numero en `numeration_requests` (advisory lock 888888, global_sequence compartida)
+3. Firma y confirma numeracion
+4. GDI-PDFComposer (:8002) genera el PDF final con estilos institucionales
+5. GDI-Notary (:8001) aplica firma digital (pyHanko PAdES/CAdES) con firma visual (logo, fecha, numero, nombre)
+6. PDF firmado se almacena en bucket `oficial` de Cloudflare R2
+7. Genera `official_documents` entry con `signed_pdf_url`
 
 **Resultado**: Documento con validez legal plena
 
 ### 5. Consulta de Documentos Oficiales
 
-**Actor**: Empleado municipal o ciudadano  
+**Actor**: Empleado municipal o ciudadano
 **Objetivo**: Acceder a documento oficial
 
 **Flujo**:
-1. Busca por número oficial o criterios
+1. Busca por numero oficial o criterios
 2. Sistema valida permisos de acceso
 3. Muestra documento desde `official_documents`
-4. Permite descarga de PDF firmado
+4. Genera URL firmada temporal para descarga segura del PDF desde Cloudflare R2
 
 **Resultado**: Acceso controlado a documento oficial
 
@@ -187,12 +190,24 @@ CREATE TABLE public.document_rejections (
 - **Pad Synchronization Service**: Sincronización en tiempo real
 
 ### Gestión de Firmas
-- **Signing Workflow Orchestrator**: Orquestador del flujo de firmas
-- **Signature Validation Service**: Validación de firmas digitales
+- **Signing Workflow Orchestrator**: Orquestador del flujo de firmas secuencial
+- **GDI-Notary (:8001)**: Servicio de firma digital con pyHanko (PAdES/CAdES)
+- **Firma Visual**: Logo institucional, fecha, numero oficial y nombre del firmante estampados en el PDF
 
-### Numeración Oficial
-- **OFFICIAL NUMBER Service**: Servicio de numeración secuencial
-- **Concurrency Control**: Control de concurrencia para números únicos
+### Generacion PDF
+- **GDI-PDFComposer (:8002)**: Generacion de PDF via Gotenberg (headless Chrome)
+- **HTML a PDF**: Conversion con estilos institucionales
+- **Marca de agua**: "BORRADOR" en previews antes del envio a firma
+
+### Almacenamiento
+- **Cloudflare R2** (S3-compatible): Almacenamiento de documentos
+- **Bucket `tosign`**: PDFs de preview/borrador
+- **Bucket `oficial`**: Documentos firmados con validez legal
+- **URLs firmadas**: Descarga segura con URLs temporales
+
+### Numeracion Oficial
+- **Servicio de numeracion secuencial**: global_sequence compartida entre todos los tipos de documento
+- **Advisory lock 888888**: Prevencion de race conditions en asignacion de numeros
 
 ### Inteligencia Artificial
 - **AI Drafting Assistant (Terra)**: Asistente para redacción

@@ -1,8 +1,10 @@
-# Backoffice GDI - Configuración de Integraciones
+# Configuracion de Integraciones
 
-## Propósito de la Sección
+## Proposito de la Seccion
 
-La **Configuración de Integraciones** permite a los Administradores conectar GDI con servicios externos que potencian y amplían las capacidades del sistema. Esta sección funciona como un **hub centralizado** donde se pueden activar, configurar y monitorear todas las conexiones con sistemas terceros.
+La seccion de **Integraciones** del Backoffice permite a los Administradores conectar GDI con servicios externos que potencian y amplian las capacidades del sistema. Funciona como un **hub centralizado** donde se activan, configuran y monitorean todas las conexiones con sistemas terceros.
+
+Las integraciones se comunican a traves de los microservicios de GDI: **GDI-AgenteLANG** (`:8004`) para funcionalidades de IA, **GDI-MCP** (integrado en el API Gateway) para comunicacion con herramientas externas, **eMailService** (`:8003`) para notificaciones, y **GDI-Notary** (`:8001`) para firma digital.
 
 ### Objetivos principales:
 

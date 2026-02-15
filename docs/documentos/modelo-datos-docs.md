@@ -214,10 +214,10 @@ CREATE TABLE official_documents (
 );
 ```
 
-**Campos Críticos:**
-- `official_number`: Número oficial único asignado
-- `signed_pdf_url`: URL del PDF firmado final
-- `numerator_id`: Usuario que asignó el número oficial
+**Campos Criticos:**
+- `official_number`: Numero oficial unico asignado
+- `signed_pdf_url`: URL del PDF firmado final, almacenado en bucket `oficial` de Cloudflare R2 (S3-compatible). Acceso via URLs firmadas temporales para descarga segura
+- `numerator_id`: Usuario que asigno el numero oficial
 - `signers`: Metadatos JSON de todos los firmantes
 
 **Relaciones:**

@@ -1,27 +1,47 @@
 # Contexto y Antecedentes
 
-## 1.3 Contexto y antecedentes
+## Evolucion de la Gestion Documental Electronica en la Region
 
-### Evolución de la Gestión Documental Electrónica
+La digitalizacion de la gestion publica en Argentina y America Latina avanzo gradualmente con la implementacion de sistemas pioneros:
 
-La digitalización de la gestión pública en Argentina avanzó gradualmente con la implementación de sistemas como SADE (GCBA, 2009), GDE (nacional) y GDEBA (Provincia de Buenos Aires). Actualmente, más de 180 organismos operan en esta plataforma, sentando las bases para la transformación digital al migrar del papel a procesos optimizados.
+- **SADE** (Sistema de Administracion de Documentos Electronicos): implementado por el Gobierno de la Ciudad de Buenos Aires en 2009, fue uno de los primeros sistemas en digitalizar tramites administrativos a gran escala.
+- **GDE** (Gestion Documental Electronica): sistema adoptado a nivel nacional en Argentina, que extendio la digitalizacion a mas de 180 organismos publicos.
+- **GDEBA** (Gestion Documental Electronica de Buenos Aires): variante provincial que adapto el modelo a la administracion de la Provincia de Buenos Aires.
 
-Sin embargo, a pesar de estos avances, los sistemas de gestión documental electrónica existentes presentan limitaciones estructurales que obstaculizan una transformación digital integral:
+Estos sistemas sentaron las bases de la transformacion digital al migrar del papel a procesos electronicos, demostrando que la gestion documental publica podia funcionar de forma digital.
+
+---
 
 ## Limitaciones de los Sistemas Actuales
 
-### Arquitecturas Obsoletas
-Monolitos con baja escalabilidad y dificultades para migrar a la nube.
+A pesar de estos avances, los sistemas de gestion documental existentes presentan limitaciones estructurales que obstaculizan una transformacion digital completa:
 
-### Dependencia de Software Propietario
-Altos costos de licencias y barreras para integrar nuevas funcionalidades.
+### Arquitecturas obsoletas
+Construidos como monolitos con baja escalabilidad. La migracion a la nube o la incorporacion de nuevas capacidades requiere esfuerzos desproporcionados.
 
-### Escalabilidad Limitada
-Soluciones locales acotadas, sin visión abierta ni crecimiento horizontal.
+### Dependencia de software propietario
+Altos costos de licencias, restricciones contractuales y barreras para personalizar o integrar nuevas funcionalidades. Las instituciones quedan atadas a proveedores especificos (vendor lock-in).
 
-### Desafíos de Interoperabilidad
-La falta de estándares abiertos y APIs bien definidas genera silos de información y dificulta el intercambio fluido de datos entre diferentes sistemas, impidiendo una gestión pública verdaderamente integrada y eficiente.
+### Escalabilidad limitada
+Soluciones pensadas para un contexto local y acotado, sin capacidad de crecimiento horizontal ni de servir a multiples organizaciones desde una misma plataforma.
 
-## Conclusión
+### Interoperabilidad deficiente
+La falta de estandares abiertos y APIs bien definidas genera silos de informacion. El intercambio de datos entre diferentes sistemas y organismos resulta costoso y fragil.
 
-Estas limitaciones refuerzan la necesidad de un sistema abierto y colaborativo, diseñado con el lenguaje del nuevo mundo digital.
+### Experiencia de usuario desactualizada
+Interfaces disenadas hace mas de una decada que no se adaptan a los estandares actuales de usabilidad, generando baja adopcion y resistencia al cambio.
+
+---
+
+## La Necesidad de un Nuevo Enfoque
+
+Estas limitaciones refuerzan la necesidad de un sistema:
+
+- **Abierto**: codigo fuente disponible, sin costos de licencias, con comunidad activa
+- **Moderno**: arquitectura de microservicios, APIs REST, despliegue en la nube
+- **Inteligente**: inteligencia artificial integrada para asistir en la gestion documental
+- **Interoperable**: estandares abiertos que permitan la conexion entre sistemas
+- **Escalable**: capacidad multi-tenant para servir a multiples organizaciones
+- **Soberano**: control total del stack tecnologico por parte de las instituciones
+
+GDI nace para cubrir exactamente esta necesidad.

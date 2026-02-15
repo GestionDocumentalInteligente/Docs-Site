@@ -1,149 +1,130 @@
-# Sistema de Movimientos - Módulo Expedientes
+# Sistema de Movimientos - Modulo Expedientes
 
 ## Tipos de Movimiento
 
 ```sql
 -- Enum para tipos de movimiento
 CREATE TYPE movement_type AS ENUM (
-    'creation',          -- Creación inicial del expediente
-    'transfer',          -- Transferencia a otro sector administrador
-    'assignment',        -- Asignación de permisos a sector
-    'status_change'      -- Cambio de estado del expediente
-
+    'creation',           -- Creacion inicial del expediente
+    'transfer',           -- Transferencia a otro sector administrador
+    'assignment',         -- Asignacion de permisos a sector
+    'assignment_close',   -- Cierre de asignacion
+    'status_change',      -- Cambio de estado del expediente
+    'document_link',      -- Vinculacion de documento oficial al expediente
+    'subsanacion',        -- Subsanacion de documento erroneo
+    'document_proposal',  -- Propuesta de documento borrador
+    'document_proposal_reject'  -- Rechazo de propuesta de documento
 );
-
--- Tabla para etiquetas en español
-CREATE TABLE movement_labels (
-    movement_type movement_type PRIMARY KEY,
-    display_name VARCHAR NOT NULL
-);
-
-INSERT INTO movement_labels (movement_type, display_name) VALUES
-    ('creation', 'Creación'),
-    ('transfer', 'Transferencia'),
-    ('assignment', 'Asignación'),
-    ('status_change', 'Cambio de Estado');
 ```
 
 ## Estructura de Movimientos
 
 ```sql
-CREATE TABLE public.record_movements (
-    -- Identificación
+CREATE TABLE case_movements (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    record_id UUID NOT NULL REFERENCES records(id),
-    movement_type movement_type NOT NULL,
-    
-    -- Quién realizó el movimiento
+    case_id UUID NOT NULL REFERENCES cases(id),
+    type movement_type NOT NULL,
     user_id UUID REFERENCES users(id),
-    external_user_id UUID REFERENCES external_users(id),
-    
-    -- Sectores involucrados
-    creator_sector_id UUID NOT NULL REFERENCES departments(id),
-    admin_sector_id UUID NOT NULL REFERENCES departments(id),
-    assigned_sector_id UUID REFERENCES departments(id),
-    
-    -- Usuario asignado
+    creator_sector_id UUID NOT NULL REFERENCES sectors(id),
+    admin_sector_id UUID NOT NULL REFERENCES sectors(id),
+    assigned_sector_id UUID REFERENCES sectors(id),
     assigned_user_id UUID REFERENCES users(id),
-    
-    -- Fechas y estados
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    is_active BOOLEAN DEFAULT true,
+    reason VARCHAR(200) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
     closed_at TIMESTAMPTZ,
-    closing_reason VARCHAR(100),
+    closing_reason VARCHAR(200),
     closed_by UUID REFERENCES users(id),
-    
-    -- Documento respaldatorio
     supporting_document_id UUID REFERENCES official_documents(id),
-    
-    -- Motivo del movimiento
-    reason VARCHAR(100) NOT NULL,
-    
-    -- Datos de auditoría
-    audit JSONB NOT NULL DEFAULT '{}'::jsonb
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+```
+
+| Columna | Tipo de Dato | Descripcion |
+|---|---|---|
+| `id` | `uuid` | **PK** - Identificador unico del movimiento. |
+| `case_id` | `uuid` | **FK** - Expediente al que pertenece (`cases`). |
+| `type` | `movement_type` | Tipo de movimiento realizado. |
+| `user_id` | `uuid` | **FK** - Usuario que realizo el movimiento (`users`). |
+| `creator_sector_id` | `uuid` | **FK** - Sector que inicio el movimiento (`sectors`). |
+| `admin_sector_id` | `uuid` | **FK** - Sector administrador actual del expediente (`sectors`). |
+| `assigned_sector_id` | `uuid` | **FK** - Sector al que se asigna (si aplica). |
+| `assigned_user_id` | `uuid` | **FK** - Usuario al que se asigna (si aplica). |
+| `reason` | `varchar(200)` | Motivo del movimiento. |
+| `is_active` | `boolean` | `true` si el movimiento esta activo. |
+| `closed_at` | `timestamptz` | Fecha de cierre del movimiento. |
+| `closing_reason` | `varchar(200)` | Razon del cierre. |
+| `closed_by` | `uuid` | Usuario que cerro el movimiento. |
+| `supporting_document_id` | `uuid` | **FK** - Documento oficial de respaldo (ej. Caratula, Pase de Vista). |
+| `created_at` | `timestamptz` | Fecha de creacion del movimiento. |
+
+## Indices de Rendimiento
+
+```sql
+CREATE INDEX idx_case_movements_case ON case_movements(case_id);
+CREATE INDEX idx_case_movements_assigned ON case_movements(assigned_sector_id);
+CREATE INDEX idx_case_movements_case_at ON case_movements(case_id, created_at DESC);
 ```
 
 ## Ejemplos de Movimientos
 
-### 1. Creación de Expediente
+### 1. Creacion de Expediente
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440001",
-  "record_id": "550e8400-e29b-41d4-a716-446655440010",
-  "movement_type": "creation",
-  "user_id": "123e4567-e89b-12d3-a456-426614174000",
-  "external_user_id": null,
-  "creator_sector_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "admin_sector_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "assigned_sector_id": null,
-  "assigned_user_id": null,
-  "created_at": "2025-08-26T09:15:00Z",
+  "case_id": "550e8400-...",
+  "type": "creation",
+  "user_id": "123e4567-...",
+  "creator_sector_id": "f47ac10b-...",
+  "admin_sector_id": "f47ac10b-...",
+  "reason": "Cargar documentacion",
   "is_active": false,
   "closed_at": "2025-08-26T09:15:01Z",
-  "closing_reason": "Creación completada automáticamente",
-  "closed_by": "SYSTEM",
-  "supporting_document_id": "550e8400-e29b-41d4-a716-446655440099",
-  "reason": "Cargar documentación",
-  "audit": {
-    "template_used": "LICPUB",
-    "generated_number": "EE-2025-001000-TN-DGCO",
-    "auto_closed": true,
-    "closed_at": "2025-08-26T09:15:01Z"
-  }
+  "closing_reason": "Creacion completada automaticamente",
+  "supporting_document_id": "550e8400-..."
 }
 ```
 
 ### 2. Transferencia de Expediente
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440002",
-  "record_id": "550e8400-e29b-41d4-a716-446655440010",
-  "movement_type": "transfer",
-  "user_id": "123e4567-e89b-12d3-a456-426614174000",
-  "external_user_id": null,
-  "creator_sector_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "admin_sector_id": "b2c3d4e5-f6g7-890h-ijkl-234567890123",
-  "assigned_sector_id": null,
-  "assigned_user_id": null,
-  "created_at": "2025-08-26T14:30:00Z",
+  "case_id": "550e8400-...",
+  "type": "transfer",
+  "user_id": "123e4567-...",
+  "creator_sector_id": "f47ac10b-...",
+  "admin_sector_id": "b2c3d4e5-...",
+  "reason": "Transferencia para dictamen legal",
   "is_active": false,
   "closed_at": "2025-08-26T14:30:01Z",
-  "closing_reason": "Transferencia completada automáticamente",
-  "closed_by": "SYSTEM",
-  "supporting_document_id": "550e8400-e29b-41d4-a716-446655440098",
-  "reason": "Transferencia para dictamen legal",
-  "audit": {
-    "previous_admin": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-    "new_admin": "b2c3d4e5-f6g7-890h-ijkl-234567890123",
-    "auto_closed": true,
-    "closed_at": "2025-08-26T14:30:01Z"
-  }
+  "closing_reason": "Transferencia completada automaticamente",
+  "supporting_document_id": "550e8400-..."
 }
 ```
 
-### 3. Asignación de Sector
+### 3. Asignacion de Sector
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440003",
-  "record_id": "550e8400-e29b-41d4-a716-446655440010",
-  "movement_type": "assignment",
-  "user_id": "123e4567-e89b-12d3-a456-426614174000",
-  "external_user_id": null,
-  "creator_sector_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "admin_sector_id": null,
-  "assigned_sector_id": "c3d4e5f6-g7h8-901i-jklm-345678901234",
-  "assigned_user_id": "d4e5f6g7-h8i9-012j-klmn-456789012345",
-  "created_at": "2025-08-26T15:45:00Z",
-  "is_active": true,
-  "closed_at": null,
-  "closing_reason": null,
-  "closed_by": null,
-  "supporting_document_id": null,
-  "reason": "Asignación para informe técnico",
-  "audit": {
-    "permission_type": "assigned_edit",
-    
-  }
+  "case_id": "550e8400-...",
+  "type": "assignment",
+  "user_id": "123e4567-...",
+  "creator_sector_id": "f47ac10b-...",
+  "admin_sector_id": "f47ac10b-...",
+  "assigned_sector_id": "c3d4e5f6-...",
+  "assigned_user_id": "d4e5f6g7-...",
+  "reason": "Asignacion para informe tecnico",
+  "is_active": true
+}
+```
+
+### 4. Vinculacion de Documento
+```json
+{
+  "case_id": "550e8400-...",
+  "type": "document_link",
+  "user_id": "123e4567-...",
+  "creator_sector_id": "f47ac10b-...",
+  "admin_sector_id": "f47ac10b-...",
+  "reason": "Vinculacion de informe tecnico IF-2025-000042",
+  "supporting_document_id": "770e8400-...",
+  "is_active": false,
+  "closed_at": "2025-08-26T16:00:01Z"
 }
 ```

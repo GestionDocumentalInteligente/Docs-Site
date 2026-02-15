@@ -1,12 +1,12 @@
-# 📋 Nomenclatura y Numeración de IDs - Módulo Expedientes
+# Nomenclatura y Numeracion de IDs - Modulo Expedientes
 
-## 🎯 Objetivo del Sistema de Numeración
+## Objetivo del Sistema de Numeracion
 
 El sistema de numeración de expedientes en GDI garantiza la **asignación única, secuencial y trazable** de identificadores que cumplen con normativas municipales, permiten búsqueda eficiente, auditoría completa y validación legal de todos los trámites administrativos.
 
 ---
 
-## 📊 Arquitectura de la Numeración
+## Arquitectura de la Numeracion
 
 ### Tabla Principal: `expedients`
 
@@ -41,7 +41,7 @@ CREATE TABLE expedient_covers (
 
 ---
 
-## 🏗️ Formato Estándar de Numeración
+## Formato Estandar de Numeracion
 
 ### 1. Expediente Principal
 
@@ -76,7 +76,7 @@ EE - 2025 - 000123 - TN - DGCO
 
 ---
 
-## 📊 Tabla de Componentes Detallada
+## Tabla de Componentes Detallada
 
 | **Componente** | **Descripción** | **Fuente en BD** | **Ejemplos** | **Reglas** |
 |----------------|-----------------|------------------|-------------|------------|
@@ -88,7 +88,7 @@ EE - 2025 - 000123 - TN - DGCO
 
 ---
 
-## ⚙️ Lógica de Asignación de Repartición
+## Logica de Asignacion de Reparticion
 
 ### Configuración en `expedient_types`
 
@@ -142,7 +142,7 @@ Resultado: EE-2025-000789-TN-DGCO (siempre DGCO)
 
 ---
 
-## 🔄 Proceso de Numeración Automática
+## Proceso de Numeracion Automatica
 
 ### Flujo Completo de Creación
 
@@ -191,7 +191,7 @@ WHERE m.id_municipality = ? AND d.department_id = ?;
 
 ---
 
-## 📄 Sistema de Carátulas Automáticas
+## Sistema de Caratulas Automaticas
 
 ### Generación Simultánea
 
@@ -233,7 +233,7 @@ Cuando se crea un expediente, **automáticamente** se genera:
 
 ---
 
-## 🔍 Búsquedas y Validaciones
+## Busquedas y Validaciones
 
 ### Búsqueda por Número Oficial
 
@@ -277,7 +277,7 @@ $$ LANGUAGE plpgsql;
 
 ---
 
-## 📊 Configuración por Municipio
+## Configuracion por Municipio
 
 ### Personalización de Formato
 
@@ -295,7 +295,7 @@ CREATE TABLE municipality_expedient_config (
 
 ---
 
-## ⚠️ Control de Integridad y Unicidad
+## Control de Integridad y Unicidad
 
 ### Constraints de Base de Datos
 
@@ -342,7 +342,7 @@ CREATE TRIGGER trigger_validate_expedient
 
 ---
 
-## 📈 Métricas y Estadísticas
+## Metricas y Estadisticas
 
 ### Análisis de Numeración
 
@@ -385,7 +385,7 @@ ORDER BY total_expedients DESC;
 
 ---
 
-## 🛠️ Comandos de Administración
+## Comandos de Administracion
 
 ### Verificación de Integridad
 
@@ -446,7 +446,7 @@ $$ LANGUAGE plpgsql;
 
 ---
 
-## 🔗 Integración con Documentos
+## Integracion con Documentos
 
 ### Vinculación Automática
 
@@ -506,7 +506,7 @@ ORDER BY created_at;
 
 ---
 
-## 🎯 Casos de Uso Prácticos
+## Casos de Uso Practicos
 
 ### Caso 1: Licitación Pública Centralizada
 
@@ -541,33 +541,35 @@ Flujo:
 
 ---
 
-## 📋 Checklist de Implementación
+## Checklist de Implementacion
 
-### ✅ Completado
-- [x] Numeración secuencial por año
-- [x] Formato estándar EE-AAAA-NNNNNN-ECO-DEPT
-- [x] Generación automática de carátulas
-- [x] Configuración por tipo de expediente
-- [x] Validación de formato y unicidad
+### Completado
+
+- [x] Numeracion secuencial por año
+- [x] Formato estandar EE-AAAA-NNNNNN-ECO-DEPT
+- [x] Generacion automatica de caratulas
+- [x] Configuracion por tipo de expediente
+- [x] Validacion de formato y unicidad
 - [x] Control de integridad en BD
 
-### 🔄 En Desarrollo
-- [ ] Configuración personalizada por municipio
-- [ ] Migración de numeración histórica
-- [ ] Dashboard de estadísticas avanzadas
-- [ ] Alertas de inconsistencias automáticas
+### En Desarrollo
 
-### 📅 Pendiente
-- [ ] Numeración para sub-expedientes
-- [ ] Archivado automático con preservación
-- [ ] Integración con sistemas de archivo histórico
-- [ ] APIs públicas de consulta de expedientes
+- [ ] Configuracion personalizada por municipio
+- [ ] Migracion de numeracion historica
+- [ ] Dashboard de estadisticas avanzadas
+- [ ] Alertas de inconsistencias automaticas
+
+### Pendiente
+
+- [ ] Numeracion para sub-expedientes
+- [ ] Archivado automatico con preservacion
+- [ ] Integracion con sistemas de archivo historico
+- [ ] APIs publicas de consulta de expedientes
 
 ---
 
-## 🔗 Referencias
+## Referencias
 
-- [Módulo Expedientes - Introducción](./01-introduccion-casos-uso-expedientes.md)
-- [Configuración de Tipos de Expediente](./backoffice-expedientes.md)
-- [Integración con Módulo Documentos](./integracion-documentos.md)
-- [Panel de Administración](./panel-expedientes.md)
+- [Casos de Uso del Modulo Expedientes](./casos-uso.md)
+- [Integracion con Modulo Documentos](./integracion-documentos.md)
+- [Modelo de Datos](./modelo-datos-exp.md)

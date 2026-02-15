@@ -265,7 +265,7 @@ SELECT EXISTS (
 ) as can_create;
 ```
 
-### 7.8 Permisos de Firma por Jerarquía (IMPLEMENTADO)
+### 7.8 Permisos de Firma por Jerarquia (IMPLEMENTADO)
 
 **Tabla**: `document_types_allowed_by_rank`
 ```sql
@@ -277,11 +277,16 @@ SELECT EXISTS (
 }
 ```
 
-**Validación de Firma (DEBE IMPLEMENTARSE):**
+Cada rank (jerarquia) tiene configurado que tipos de documento puede firmar. Por ejemplo:
+- **admin** (Intendente): puede firmar Decretos, Resoluciones, Disposiciones
+- **supervisor** (Secretario): puede firmar Resoluciones, Disposiciones
+- **jefe** (Director): puede firmar Disposiciones
+
+**Validacion de Firma:**
 ```sql
 -- Verificar si usuario puede firmar tipo de documento
 SELECT EXISTS (
-    SELECT 1 
+    SELECT 1
     FROM document_types_allowed_by_rank dtar
     JOIN departments d ON dtar.rank_id = d.rank_id
     JOIN sectors s ON d.department_id = s.department_id

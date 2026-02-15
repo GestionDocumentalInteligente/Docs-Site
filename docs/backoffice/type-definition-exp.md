@@ -1,8 +1,8 @@
-# Configuración de Expedientes
+# Configuracion de Expedientes
 
-## 1. Propósito de la Sección
+## 1. Proposito de la Seccion
 
-La Configuración de Expedientes permite a los Administradores definir y personalizar los parámetros fundamentales para la creación, gestión y tramitación de expedientes electrónicos dentro del sistema GDI. El objetivo es adaptar el comportamiento del módulo GDI-EXPEDIENTES a las necesidades específicas de cada municipalidad.
+La seccion de Configuracion de Expedientes del Backoffice permite a los Administradores definir y personalizar los tipos de expedientes electronicos disponibles en el sistema GDI. Cada tipo de expediente se configura como un objeto `ExpedientTypeDefinition` que define su identidad, permisos de creacion, reparticion administradora y logica de numeracion.
 
 ### Objetivos principales:
 
@@ -172,9 +172,9 @@ Al seleccionar una plantilla, el Administrador puede ajustar:
 - **Motivo**: Personalizar la descripción según políticas locales
 - **Campos no editables**: Acrónimo y tipo permanecen fijos para mantener compatibilidad
 
-## 6. Relación con la Base de Datos
+## 6. Relacion con la Base de Datos
 
-Las definiciones de tipos de expediente configuradas en el Backoffice se persisten en la base de datos, principalmente en la tabla `record_templates`. Cada parámetro de configuración (`tipo_de_expediente`, `acronimo`, `motivo_del_expediente`, `tipo_de_inicio`, `reparticiones_habilitadas`, `seleccion_multiple`, `reparticion_caratuladora`, `reparticion_especifica`) se mapea a un campo o conjunto de campos dentro de esta tabla (`type_name`, `acronym`, `description`, `creation_channel`, `enabled_departments`, `filing_department_id`), asegurando la integridad y persistencia de la configuración. Para más detalles sobre la estructura de la base de datos, consulte la documentación en `06-DataBase/Tablas Expediente/Expediente.md`.
+Las definiciones de tipos de expediente configuradas en el Backoffice se persisten en la tabla `record_templates` de la base de datos. Los parametros de configuracion se mapean a campos de esta tabla: `type_name`, `acronym`, `description`, `creation_channel`, `enabled_departments`, `filing_department_id`. Para mas detalles sobre la estructura de la base de datos, consulte la seccion de **Base de Datos**.
 
 ## 7. Nomenclatura y Numeración de IDs
 

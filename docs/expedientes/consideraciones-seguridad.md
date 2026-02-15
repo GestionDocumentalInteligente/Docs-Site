@@ -1,85 +1,106 @@
 # Consideraciones de Seguridad
 
-## 11.1 Control de Acceso Granular
+## Control de Acceso Granular
 
-### Nivel de Expediente:
+### Nivel de Expediente
 
-- **Verificación de pertenencia**: Validación automática de que el usuario pertenece al sector administrador o actuante
+- **Verificacion de pertenencia**: Validacion automatica de que el usuario pertenece al sector administrador o actuante
 
-- **Permisos diferenciales**: Distintos niveles de acceso según el rol (administrador total vs. actuante específico)
+- **Permisos diferenciales**: Distintos niveles de acceso segun el rol (administrador total vs. actuante especifico vs. solo lectura)
 
-- **Auditoría de accesos**: Registro de todos los accesos y operaciones sobre expedientes
+- **Auditoria de accesos**: Registro de todos los accesos y operaciones sobre expedientes
 
-### Nivel de Sección:
+### Nivel de Seccion
 
-- **Documentos**: Solo usuarios con permisos de gestión pueden vincular/subsanar
+| Seccion | Regla de Acceso |
+|---------|-----------------|
+| **Documentos** | Solo usuarios con permisos de gestion (write) pueden vincular y subsanar |
+| **Acciones** | Permisos especificos para crear, asignar y finalizar tareas |
+| **Asistente AI** | Chat privado por usuario, sin acceso cruzado a conversaciones |
 
-- **Acciones**: Permisos específicos para crear, asignar y finalizar tareas
+---
 
-- **Asistente AI**: Chat privado por usuario, sin acceso cruzado a conversaciones
+## Integridad de Datos
 
-## 11.2 Integridad de Datos
+### Caratula Automatica
 
-### Carátula Automática:
-
-- **Firma digital inmutable**: La firma automática del creador no puede ser alterada
+- **Firma digital inmutable**: La firma automatica del creador no puede ser alterada post-generacion
 
 - **Timestamp certificado**: Hora oficial del sistema para garantizar veracidad temporal
 
-- **Hash de integridad**: Verificación criptográfica de que la carátula no fue modificada
+- **Hash de integridad**: Verificacion criptografica de que la caratula no fue modificada
 
-### Vinculación de Documentos:
+### Vinculacion de Documentos
 
-- **Verificación de existencia**: Validación de que el documento existe y es accesible
+- **Verificacion de existencia**: Validacion de que el documento existe y es accesible antes de vincularlo
 
-- **Control de versiones**: Registro de la versión específica vinculada al momento de la asociación
+- **Control de versiones**: Registro de la version especifica vinculada al momento de la asociacion
 
-- **Trazabilidad de cambios**: Log completo de vinculaciones y subsanaciones
+- **Trazabilidad de cambios**: Log completo de vinculaciones y subsanaciones con usuario, fecha y motivo
 
-## 11.3 Auditoría y Trazabilidad
+---
 
-### Log de Expediente:
+## Auditoria y Trazabilidad
 
-- **Creación**: Usuario, timestamp, datos iniciales
+### Registro de Movimientos
 
-- **Modificaciones**: Cambios en asignaciones, transferencias, vinculaciones
+Toda accion sobre un expediente queda registrada en la tabla `case_movements`:
 
-- **Accesos**: Quién accedió, cuándo y qué secciones consultó
+| Evento | Datos Registrados |
+|--------|-------------------|
+| **Creacion** | Usuario creador, timestamp, datos iniciales, sector administrador |
+| **Vinculacion de documento** | Usuario, documento vinculado, order_number, timestamp |
+| **Solicitud de actuacion** | Usuario solicitante, sector destino, motivo, timestamp |
+| **Transferencia** | Sector emisor, sector receptor, PV generado, timestamp |
+| **Asignacion** | Usuario que asigna, usuario asignado, timestamp |
+| **Subsanacion** | Usuario, documento original, documento nuevo, justificacion |
 
-- **Acciones**: Todas las solicitudes de actuación y sus respuestas
+### Seguridad de Transferencias
 
-### Seguridad de Transferencias:
+- **Validacion de sectores**: Verificacion de que el sector destinatario existe y esta activo en el organigrama
 
-- **Validación de sectores**: Verificación de que el sector destinatario existe y está activo
+- **Registro de cambio de propiedad**: Log inmutable del cambio de administracion
 
-- **Registro de cambio de propiedad**: Log inmutable del cambio de administración
+- **Notificacion automatica**: Comunicacion a ambos sectores involucrados en la transferencia
 
-- **Notificación automática**: Comunicación a ambos sectores involucrados
+- **Generacion de PV**: Documento formal (Pase de Vista) que certifica la transferencia
 
-## 11.4 Protección de Información Sensible
+---
 
-### Datos de Iniciadores Externos:
+## Proteccion de Informacion Sensible
 
-- **Cifrado de CUIT/CUIL**: Datos fiscales protegidos con cifrado específico
+### Datos de Iniciadores Externos
 
-- **Validación API**: Verificación contra fuentes oficiales sin almacenar datos innecesarios
+- **Proteccion de CUIT/CUIL**: Datos fiscales almacenados con restricciones de acceso
+
+- **Validacion via API**: Verificacion contra fuentes oficiales sin almacenar datos innecesarios
 
 - **Acceso restringido**: Solo usuarios autorizados pueden ver datos completos de iniciadores externos
 
-### Asistente AI:
+### Asistente AI
 
-- **Aislamiento de conversaciones**: Cada usuario tiene acceso solo a sus propias interacciones
+- **Aislamiento de conversaciones**: Cada usuario tiene acceso solo a sus propias interacciones con el asistente
 
-- **Filtrado de información sensible**: El AI no expone datos de otros usuarios o expedientes no autorizados
+- **Filtrado de informacion**: El AI no expone datos de otros usuarios o expedientes no autorizados
 
-- **Logs de consultas**: Registro de todas las interacciones para auditoría de uso
+- **Registro de consultas**: Todas las interacciones quedan registradas para auditoria de uso
 
-## 11.5 Cumplimiento Normativo
+---
 
-### Retención de Datos:
+## Cumplimiento Normativo
 
-- **Políticas de archivo**: Definición de tiempos de retención según tipo de expediente
+### Retencion de Datos
+
+- **Politicas de archivo**: Definicion de tiempos de retencion segun tipo de expediente
 
 - **Backup seguro**: Respaldos cifrados con acceso controlado
 
-- **Recuperación controlada**: Procedimientos seguros para restauración de expedientes
+- **Recuperacion controlada**: Procedimientos seguros para restauracion de expedientes
+
+### Multi-Tenancy
+
+- **Aislamiento por schema**: Cada organizacion opera en su propio schema de PostgreSQL, garantizando separacion total de datos
+
+- **Validacion de tenant**: Toda consulta a la base de datos incluye validacion del schema correspondiente
+
+- **Auditoria por tenant**: Logs separados por organizacion para cumplimiento regulatorio independiente
