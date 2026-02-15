@@ -1,100 +1,131 @@
-# Flujo de Creacion y Envio de Notas
+# Flujo de Creacion, Firma y Envio de Notas
 
-El proceso de creacion y envio de notas en GDI esta disenado para ser directo y eficiente, permitiendo a los usuarios comunicarse formalmente con otros sectores de la organizacion con trazabilidad completa.
+Una Nota en GDI es un documento oficial que pasa por el circuito completo de firma digital antes de ser visible para los destinatarios. El flujo combina la creacion de documentos con el sistema de destinatarios propio de las Notas.
 
 ## Diagrama General del Flujo
 
 ```mermaid
 flowchart TD
-    A[Usuario accede al modulo Notas] --> B[Selecciona 'Nueva Nota']
-    B --> C[Completa formulario]
-    C --> D{Adjuntar documentos?}
-    D -->|Si| E[Selecciona documentos oficiales]
-    D -->|No| F[Selecciona sectores destinatarios]
-    E --> F
-    F --> G{Validacion de datos}
-    G -->|Datos incompletos| H[Muestra errores de validacion]
-    H --> C
-    G -->|Datos validos| I[Envia la nota]
-    I --> J[Sistema registra nota en BD]
-    J --> K[Crea registros de destinatarios]
-    K --> L[Nota visible en bandeja de destinatarios]
-    L --> M[Nota visible en 'Enviados' del emisor]
+    A[Usuario crea documento tipo NOTA] --> B[Define destinatarios TO/CC/BCC]
+    B --> C[Redacta contenido HTML]
+    C --> D[Asigna numerador y firmantes]
+    D --> E[Guarda borrador]
+    E --> F{Validacion pre-firma}
+    F -->|Falla| G[Muestra errores]
+    G --> B
+    F -->|OK| H[Inicia circuito de firma]
+    H --> I[Numerador firma y asigna numero oficial]
+    I --> J[Firmantes firman secuencialmente]
+    J --> K{Todos firmaron?}
+    K -->|No| L{Rechazo?}
+    L -->|Si| M[Nota vuelve a draft]
+    L -->|No| J
+    K -->|Si| N[Nota pasa a estado official]
+    N --> O[Visible en bandeja de destinatarios]
 ```
 
 ---
 
 ## Pasos Detallados
 
-### Paso 1: Acceso al Modulo
+### Paso 1: Crear Documento tipo NOTA
 
-El usuario accede al modulo de Notas desde el menu principal de GDI. Se presenta la bandeja de entrada como vista por defecto.
+El usuario crea un nuevo documento seleccionando el tipo **NOTA** desde el catalogo de tipos de documento. Esto se hace a traves del endpoint estandar de creacion de documentos.
 
-### Paso 2: Iniciar Nueva Nota
+```
+POST /documents/
+{
+  "document_type_id": <ID del tipo NOTA>,
+  "reference": "Asunto de la nota",
+  "recipients": {
+    "to": ["uuid-sector-destino-1"],
+    "cc": ["uuid-sector-copia"],
+    "bcc": ["uuid-sector-oculto"]
+  },
+  "sender_sector_id": "uuid-mi-sector"
+}
+```
 
-El usuario selecciona la accion "Nueva Nota", que abre el formulario de creacion.
+### Paso 2: Definir Destinatarios
 
-### Paso 3: Completar Formulario
+Los destinatarios se definen al momento de crear o guardar la nota:
 
-El formulario de creacion requiere los siguientes campos:
+| Tipo | Obligatorio | Descripcion |
+|------|:-----------:|-------------|
+| **TO** | Si | Destinatarios principales. Al menos uno requerido |
+| **CC** | No | Copia. Visible para todos los destinatarios |
+| **BCC** | No | Copia oculta. Solo visible para el emisor |
 
-| Campo | Tipo | Obligatorio | Descripcion |
-|-------|------|-------------|-------------|
-| **Asunto** | Text Input | Si | Titulo breve de la comunicacion (max 200 caracteres) |
-| **Cuerpo** | Textarea | Si | Contenido completo del mensaje |
-| **Destinatarios** | Multi-select | Si | Uno o mas sectores destinatarios |
-| **Adjuntos** | File selector | No | Documentos oficiales a vincular |
+!!! tip "Validaciones de destinatarios"
+    - Al menos 1 destinatario TO es obligatorio
+    - El sector emisor no puede ser destinatario
+    - Si un sector aparece en TO, se elimina automaticamente de CC/BCC
+    - Todos los sectores deben existir y estar activos
 
-!!! tip "Selector de destinatarios"
-    El selector de destinatarios muestra los sectores disponibles segun la estructura organizacional configurada en el sistema. El usuario puede seleccionar multiples sectores en una sola operacion.
+### Paso 3: Redactar Contenido
 
-### Paso 4: Adjuntar Documentos (Opcional)
+El contenido se redacta en el editor HTML (Quill), igual que cualquier otro documento:
 
-Si el usuario necesita acompanar la nota con documentacion oficial:
+- **Asunto** (`reference`): titulo breve de la comunicacion
+- **Cuerpo** (`content.html`): contenido completo en HTML
 
-1. Selecciona la opcion de adjuntar documentos
-2. El sistema muestra documentos oficiales disponibles
-3. El usuario selecciona uno o mas documentos
-4. Los documentos quedan vinculados a la nota
+### Paso 4: Asignar Firmantes
 
-!!! warning "Solo documentos oficiales"
-    Las notas solo permiten adjuntar documentos que ya existen en el sistema GDI. No se permite la carga de archivos externos directamente en la nota.
+Como documento oficial, la nota requiere:
 
-### Paso 5: Seleccion de Destinatarios
+- **Numerador**: primer firmante, asigna el numero oficial al firmar
+- **Firmantes**: uno o mas firmantes adicionales en orden secuencial
 
-El usuario selecciona los sectores que recibiran la nota:
+### Paso 5: Guardar Borrador
 
-- Se muestra un listado de sectores de la organizacion
-- Permite seleccion multiple
-- Al menos un destinatario es obligatorio
+```
+PATCH /documents/{id}/save
+{
+  "content": "<h1>Contenido</h1><p>...</p>",
+  "signers": [...],
+  "recipients": { "to": [...], "cc": [...], "bcc": [...] }
+}
+```
 
-### Paso 6: Validacion
+Al guardar, el sistema actualiza contenido, firmantes y destinatarios. Los recipients anteriores se reemplazan completamente.
 
-Antes del envio, el sistema valida:
+### Paso 6: Validacion Pre-Firma
+
+Antes de iniciar el circuito de firma, el sistema valida:
 
 | Validacion | Regla |
 |------------|-------|
-| **Asunto** | No puede estar vacio |
-| **Cuerpo** | No puede estar vacio |
-| **Destinatarios** | Al menos un sector seleccionado |
-| **Permisos** | Usuario debe pertenecer a un sector activo |
+| **Destinatarios TO** | Al menos un sector TO definido |
+| **Sectores activos** | Todos los sectores destinatarios deben estar activos |
+| **Numerador** | Debe tener numerador asignado |
+| **Firmantes** | Al menos un firmante ademas del numerador |
+| **Contenido** | Debe tener contenido no vacio |
 
-Si alguna validacion falla, se muestran mensajes de error y el usuario puede corregir los datos.
+Si la validacion falla, se lanza `ValidationError` y la nota no puede enviarse a firma.
 
-### Paso 7: Envio
+### Paso 7: Circuito de Firma
 
-Al confirmar el envio:
+```
+POST /documents/{id}/start-signing-process
+```
 
-1. **Registro de la nota**: Se crea el registro principal en la tabla `notes` con los datos del emisor
-2. **Registro de destinatarios**: Se crea un registro en `note_recipients` por cada sector destinatario
-3. **Registro de adjuntos**: Si hay documentos adjuntos, se crean los registros en `note_attachments`
-4. **Confirmacion**: El sistema confirma el envio exitoso al usuario
+Al iniciar el circuito:
 
-### Paso 8: Resultado
+1. El documento cambia a estado `sent_to_sign`
+2. GDI-Notary genera el PDF para firma
+3. El numerador recibe la nota para firmar primero
+4. Al firmar el numerador, se asigna el numero oficial (advisory lock 888888 + global_sequence)
+5. Los firmantes restantes firman en orden secuencial
+6. Al completarse todas las firmas, la nota pasa a `official`
 
-- La nota aparece en la **bandeja de enviados** del emisor
-- La nota aparece en la **bandeja de entrada** de cada sector destinatario
-- Los destinatarios ven la nota como **sin leer** hasta que la abran
+### Paso 8: Nota Oficial
+
+Una vez oficial:
+
+- Se crea registro en `official_documents`
+- La nota aparece en `GET /notes/received` de los sectores destinatarios
+- La nota aparece en `GET /notes/sent` del emisor
+- Los destinatarios la ven como "sin leer" hasta que la abran
 
 ---
 
@@ -104,26 +135,27 @@ Al confirmar el envio:
 flowchart TD
     A[Destinatario accede a Bandeja de Entrada] --> B[Ve nota sin leer]
     B --> C[Abre la nota]
-    C --> D[Sistema registra read_at]
+    C --> D[Sistema registra apertura en notes_openings]
     D --> E[Nota marcada como leida]
     E --> F{Accion del usuario?}
     F -->|Archivar| G[Nota se mueve a Archivados]
-    F -->|Ninguna| H[Nota permanece en Bandeja]
+    F -->|Desarchivar| H[Nota vuelve a Bandeja]
+    F -->|Ninguna| I[Nota permanece en Bandeja]
 ```
 
-### Lectura de Nota
+### Apertura de Nota
 
-1. El destinatario ve la nota en su bandeja de entrada con indicador de "sin leer"
-2. Al abrir la nota, el sistema registra automaticamente el timestamp de lectura (`read_at`)
-3. La nota cambia su indicador visual a "leida"
-4. El emisor puede ver en su bandeja de enviados que el destinatario leyo la nota
+1. El destinatario ve la nota en su bandeja con indicador "sin leer"
+2. Al abrir (`GET /notes/{id}`), el sistema registra automaticamente la apertura en `notes_openings`
+3. El registro es **idempotente**: solo se registra la primera apertura por usuario
+4. El emisor puede ver las aperturas (quien, cuando) desde el detalle de la nota
 
 ### Archivo de Nota
 
-1. El destinatario puede archivar una nota desde la bandeja de entrada
-2. Se registra el timestamp de archivo (`archived_at`)
-3. La nota se mueve a la bandeja de archivados
-4. La nota sigue siendo accesible desde la bandeja de archivados para consulta futura
+1. El destinatario archiva la nota (`PATCH /notes/{id}/archive`)
+2. Se actualiza `is_archived = true` y `archived_at = NOW()` en `notes_recipients`
+3. La nota desaparece de la bandeja de entrada y aparece en archivados
+4. Puede desarchivarse para volver a la bandeja de entrada
 
 ---
 
@@ -134,35 +166,46 @@ sequenceDiagram
     actor U as Usuario Emisor
     participant F as Frontend
     participant B as Backend
+    participant N as Notary
     participant DB as PostgreSQL
     actor D as Destinatario
 
-    U->>F: Crea nueva nota
-    F->>F: Completa formulario
-    U->>F: Selecciona destinatarios
-    U->>F: Confirma envio
-    F->>B: POST /api/notes
-    B->>B: Valida datos y permisos
-    B->>DB: INSERT notes
-    B->>DB: INSERT note_recipients (x N sectores)
-    B->>DB: INSERT note_attachments (si aplica)
-    B-->>F: 201 Created
-    F-->>U: Confirmacion de envio
+    U->>F: Crea documento tipo NOTA
+    F->>B: POST /documents (con recipients)
+    B->>DB: INSERT document_draft + notes_recipients
+    B-->>F: 201 Created (draft)
+
+    U->>F: Guarda contenido y firmantes
+    F->>B: PATCH /documents/{id}/save
+    B->>DB: UPDATE content, signers, recipients
+    B-->>F: 200 OK
+
+    U->>F: Inicia circuito de firma
+    F->>B: POST /documents/{id}/start-signing-process
+    B->>B: validate_nota_recipients_for_signing()
+    B->>N: Genera PDF para firma
+    B->>DB: UPDATE status = sent_to_sign
+    B-->>F: 200 OK
+
+    U->>F: Numerador firma
+    F->>B: POST /documents/{id}/sign
+    B->>N: Firma digital + numero oficial
+    B->>DB: UPDATE numero oficial (advisory lock 888888)
+    B-->>F: 200 OK
+
+    Note over B: Firmantes restantes firman secuencialmente
+
+    B->>DB: INSERT official_documents (status = official)
 
     D->>F: Accede a Bandeja de Entrada
-    F->>B: GET /api/notes/inbox
-    B->>DB: SELECT notas del sector
-    DB-->>B: Listado de notas
-    B-->>F: Notas con estado de lectura
-    F-->>D: Muestra bandeja
+    F->>B: GET /notes/received
+    B->>DB: SELECT notas oficiales por sector
+    B-->>F: Lista con estado de lectura
 
     D->>F: Abre nota
-    F->>B: GET /api/notes/:id
-    B->>DB: UPDATE read_at = NOW()
-    B->>DB: SELECT nota completa
-    DB-->>B: Detalle de nota
-    B-->>F: Nota con adjuntos
-    F-->>D: Muestra detalle
+    F->>B: GET /notes/{document_id}
+    B->>DB: INSERT notes_openings (primera apertura)
+    B-->>F: Detalle completo con recipients
 ```
 
 ---
@@ -170,10 +213,10 @@ sequenceDiagram
 ## Consideraciones Tecnicas
 
 !!! note "Transaccionalidad"
-    La creacion de una nota (registro principal + destinatarios + adjuntos) se ejecuta dentro de una **transaccion unica** para garantizar consistencia. Si falla alguna parte, se revierte todo el proceso.
+    La creacion del documento y sus recipients se ejecuta dentro de una **transaccion unica**. Si falla la insercion de recipients, se revierte la creacion del documento.
 
-!!! tip "Performance"
-    Las consultas de bandeja estan optimizadas con indices sobre `recipient_sector_id`, `read_at` y `archived_at` para garantizar tiempos de respuesta rapidos incluso con alto volumen de notas.
+!!! tip "Validacion pre-firma"
+    La funcion `validate_nota_recipients_for_signing()` se ejecuta antes de enviar a Notary. Verifica que exista al menos un TO y que todos los sectores destinatarios sigan activos. Si falla, la nota no puede enviarse a firma.
 
 !!! warning "Multi-tenant"
     Como todo modulo de GDI, las operaciones de notas respetan el esquema del tenant activo. El parametro `schema_name` es **keyword-only** en todas las funciones de base de datos.

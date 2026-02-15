@@ -2,96 +2,111 @@
 
 ## Que son las Notas en GDI?
 
-El modulo de **Notas** es el sistema de **comunicacion oficial inter-sectorial** de GDI, disenado para facilitar el intercambio formal de mensajes entre sectores dentro de una organizacion gubernamental. A diferencia de un sistema de mensajeria informal, las Notas garantizan **trazabilidad completa**, **registro historico** y **formalidad institucional** en cada comunicacion.
+El modulo de **Notas** es el sistema de **comunicacion oficial inter-sectorial** de GDI. Una Nota es un **documento oficial** de tipo `NOTA` que pasa por el circuito completo de firma digital y recibe un numero oficial unico, igual que cualquier otro documento del sistema.
+
+A diferencia de otros tipos documentales (Decretos, Resoluciones, Disposiciones), las Notas estan disenadas especificamente para la **comunicacion formal entre sectores**, con un sistema de destinatarios (TO, CC, BCC), tracking de lectura y bandejas organizativas.
 
 ### Definicion de Nota en GDI
 
-Una **Nota** es una comunicacion oficial digital enviada desde un sector a uno o mas sectores destinatarios, que contiene un asunto, un cuerpo de mensaje y opcionalmente documentos adjuntos. Cada nota queda registrada en el sistema con informacion completa de emisor, destinatarios, fechas y estado de lectura.
+Una **Nota** es un documento oficial digital con numero unico (ej: `NOTA-2026-000123-TN-LEGAL`), firmado digitalmente, enviado desde un sector a uno o mas sectores destinatarios. Contiene un asunto, un cuerpo HTML y pasa por el circuito de firma antes de ser visible para los destinatarios.
 
-Es la unidad fundamental de comunicacion institucional sobre la cual se construye la trazabilidad de las interacciones entre areas de gobierno.
+Es la unidad fundamental de comunicacion institucional oficial, con la misma validez legal que cualquier otro documento firmado del sistema.
 
-!!! note "Diferencia con otros modulos"
-    Las Notas **no son documentos oficiales** (no tienen circuito de firma ni numeracion oficial) y **no son expedientes** (no agrupan tramites). Son comunicaciones formales entre sectores, con un ciclo de vida propio centrado en el envio, recepcion, lectura y archivo.
+!!! note "Nota como documento oficial"
+    Las Notas **son documentos oficiales**: tienen numero oficial, circuito de firma digital (numerador + firmantes), y se almacenan en `official_documents` una vez firmadas. La diferencia con otros documentos es que se comunican a traves del modulo de Notas, con destinatarios, bandejas y tracking de lectura.
 
 ## Propuesta de Valor
 
 ### Caracteristicas Diferenciadoras
 
-- **Comunicacion Formal**: Canal oficial con registro y trazabilidad, reemplazando medios informales
-- **Multi-destinatario**: Envio simultaneo a multiples sectores en una sola operacion
-- **Adjuntos Oficiales**: Posibilidad de vincular documentos oficiales del sistema a la nota
+- **Documento oficial con firma**: Circuito completo de firma digital PAdES, con numerador y firmantes secuenciales
+- **Numero oficial unico**: Formato estandar `NOTA-AAAA-NNNNNN-SIGLA_ECO-SIGLA_DEPT`
+- **Multi-destinatario**: Envio a multiples sectores con tipos TO, CC y BCC
+- **Privacidad BCC**: Los destinatarios en copia oculta solo son visibles para el emisor
 - **Gestion de Bandejas**: Organizacion en bandeja de entrada, enviados y archivados
-- **Trazabilidad de Lectura**: Registro de cuando cada destinatario leyo la nota
+- **Trazabilidad de Lectura**: Registro de cuando cada destinatario abrio la nota
 - **Integracion Organizacional**: Respeta la estructura de departments y sectores del organigrama
+- **Multi-sector**: Un usuario con acceso a multiples sectores ve notas de todos ellos
 
 ---
 
 ## Casos de Uso Principales
 
-### 1. Comunicacion Formal entre Sectores
+### 1. Crear y Firmar una Nota
 
 **Actor**: Empleado municipal
-**Objetivo**: Enviar una comunicacion oficial a otro sector
+**Objetivo**: Enviar una comunicacion oficial firmada a otro sector
 
 **Flujo**:
-1. Accede al modulo de Notas desde el menu principal
-2. Crea una nueva nota indicando asunto y cuerpo
-3. Selecciona uno o mas sectores destinatarios
-4. Opcionalmente adjunta documentos oficiales
-5. Envia la nota
+1. Crea un nuevo documento de tipo NOTA desde el modulo de Documentos
+2. Define destinatarios: sectores TO (obligatorio), CC y BCC (opcionales)
+3. Redacta el contenido (asunto + cuerpo HTML)
+4. Asigna numerador y firmantes
+5. Envia al circuito de firma
+6. Numerador firma y asigna numero oficial
+7. Firmantes completan la firma secuencialmente
+8. Al completarse todas las firmas, la nota pasa a estado `official`
+9. La nota aparece en la bandeja de entrada de los sectores destinatarios
 
-**Resultado**: Nota registrada en el sistema, visible en la bandeja de entrada de los destinatarios
+**Resultado**: Nota oficial firmada, numerada y visible para los destinatarios
 
 ### 2. Consulta de Notas Recibidas
 
 **Actor**: Empleado municipal
-**Objetivo**: Revisar comunicaciones recibidas por su sector
+**Objetivo**: Revisar comunicaciones oficiales recibidas por su sector
 
 **Flujo**:
 1. Accede a la bandeja de entrada de Notas
 2. Visualiza listado de notas recibidas (leidas y sin leer)
-3. Selecciona una nota para ver su detalle completo
-4. El sistema marca la nota como leida automaticamente
+3. Filtra por fecha, busqueda de texto o estado de lectura
+4. Selecciona una nota para ver su detalle completo
+5. El sistema registra automaticamente la apertura
 
 **Resultado**: Nota consultada con registro de lectura
 
-### 3. Archivo de Notas
+### 3. Archivo y Desarchivo de Notas
 
-**Actor**: Empleado municipal
-**Objetivo**: Organizar notas procesadas moviéndolas al archivo
+**Actor**: Empleado municipal (destinatario)
+**Objetivo**: Organizar notas procesadas
 
 **Flujo**:
 1. Desde la bandeja de entrada, selecciona una nota
 2. Ejecuta la accion de archivar
 3. La nota se mueve a la bandeja de archivados
-4. Puede consultarla posteriormente desde esa bandeja
+4. Puede desarchivarla posteriormente para volver a la bandeja de entrada
 
-**Resultado**: Nota archivada, bandeja de entrada organizada
+**Resultado**: Nota archivada, bandeja organizada
+
+!!! warning "Archivado por sector"
+    El archivado es por sector. Si una nota fue enviada a 2 sectores del mismo usuario, archivarla en un sector no la archiva en el otro. El emisor no puede archivar sus propias notas.
 
 ### 4. Seguimiento de Notas Enviadas
 
 **Actor**: Empleado municipal (emisor)
-**Objetivo**: Verificar el estado de las notas que envio
+**Objetivo**: Verificar el estado de lectura de las notas enviadas
 
 **Flujo**:
 1. Accede a la bandeja de notas enviadas
 2. Visualiza listado con estado de lectura por destinatario
-3. Identifica que sectores han leido la nota y cuales no
+3. Al abrir el detalle, ve exactamente quien abrio la nota y cuando
+4. Identifica que sectores han leido la nota y cuales no
 
 **Resultado**: Visibilidad completa del alcance de la comunicacion
 
-### 5. Envio de Nota con Documentos Adjuntos
+### 5. Nota con Destinatarios BCC
 
 **Actor**: Empleado municipal
-**Objetivo**: Comunicar informacion acompanada de documentacion oficial
+**Objetivo**: Enviar comunicacion oficial con destinatarios en copia oculta
 
 **Flujo**:
-1. Crea una nueva nota con asunto y cuerpo
-2. Selecciona sectores destinatarios
-3. Adjunta uno o mas documentos oficiales existentes en el sistema
-4. Envia la nota con los adjuntos vinculados
+1. Crea nota con destinatarios TO y opcionalmente CC
+2. Agrega destinatarios BCC (copia oculta)
+3. Completa el circuito de firma
+4. Los destinatarios TO/CC ven la nota y los destinatarios visibles
+5. Los destinatarios BCC reciben la nota pero no son visibles para TO/CC
+6. Solo el emisor puede ver la lista completa incluyendo BCC
 
-**Resultado**: Nota enviada con documentos oficiales accesibles por los destinatarios
+**Resultado**: Comunicacion con privacidad parcial garantizada
 
 ---
 
@@ -101,43 +116,37 @@ Es la unidad fundamental de comunicacion institucional sobre la cual se construy
 
 | Componente | Descripcion |
 |------------|-------------|
-| **Bandeja de Entrada** | Listado de notas recibidas por el sector del usuario, con indicador de leida/sin leer |
+| **Bandeja de Entrada** | Listado de notas recibidas por los sectores del usuario, con indicador de leida/sin leer |
 | **Bandeja de Enviados** | Listado de notas enviadas por el usuario, con estado de lectura por destinatario |
 | **Bandeja de Archivados** | Notas archivadas por el usuario para referencia futura |
-| **Formulario de Creacion** | Interfaz para redactar nueva nota con selector de destinatarios y adjuntos |
-| **Vista de Detalle** | Visualizacion completa de una nota con su cuerpo, adjuntos e historial |
+| **Detalle de Nota** | Visualizacion completa con contenido HTML, firmantes, destinatarios y aperturas |
 
 ### Logica de Negocio (Backend)
 
 | Componente | Descripcion |
 |------------|-------------|
-| **Notes Service** | Gestion de creacion, envio y consulta de notas |
-| **Recipients Manager** | Administracion de destinatarios y estados de lectura |
-| **Attachments Handler** | Vinculacion de documentos oficiales a las notas |
-| **Inbox/Outbox Engine** | Motor de bandejas con filtros y paginacion |
+| **Notes Retrieval** | Consulta de notas recibidas, enviadas y archivadas con paginacion y filtros |
+| **Recipients Manager** | Gestion de destinatarios TO/CC/BCC, validacion y visibilidad |
+| **Tracking Service** | Registro de aperturas y estado de lectura |
+| **Archiving Service** | Archivo y desarchivo de notas por sector |
+| **Validation** | Validacion de recipients previo a firma |
 
 ### Almacenamiento
 
 | Recurso | Uso |
 |---------|-----|
-| **PostgreSQL** | Tablas `notes`, `note_recipients`, `note_attachments` |
-| **Indices** | Optimizacion de consultas por sector, estado y fecha |
+| **PostgreSQL** | Tablas `notes_recipients`, `notes_openings` + tablas de documentos (`document_draft`, `official_documents`) |
+| **Indices parciales** | Optimizacion de consultas por sector, estado de lectura y archivado |
 
 ---
 
 ## Trazabilidad y Auditoria
 
-### Campos de Auditoria
-
-Todas las tablas del modulo incluyen:
-- **`created_at`**: Timestamp de creacion del registro
-- **`read_at`**: Timestamp de primera lectura (en destinatarios)
-- **`archived_at`**: Timestamp de archivo
-- **User tracking**: Identificacion del usuario emisor y sector
-
 ### Registro Completo
 
-- Creacion: usuario emisor, sector, timestamp
-- Envio: sectores destinatarios, fecha de envio
-- Lectura: fecha y hora en que cada destinatario abrio la nota
-- Archivo: fecha en que cada destinatario archivo la nota
+- **Creacion**: usuario creador, sector emisor, timestamp, tipo de documento NOTA
+- **Firma**: circuito de firma digital con timestamp por firmante
+- **Numeracion**: numero oficial unico asignado al firmar (advisory lock 888888)
+- **Destinatarios**: registro de sectores TO/CC/BCC con sector emisor
+- **Lectura**: fecha y hora de primera apertura por cada usuario (tabla `notes_openings`)
+- **Archivo**: fecha de archivo/desarchivo por sector (en `notes_recipients`)

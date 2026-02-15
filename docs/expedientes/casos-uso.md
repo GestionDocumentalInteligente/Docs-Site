@@ -8,9 +8,6 @@ Un **Expediente electronico** (EE) es un conjunto de documentos digitales vincul
 
 GDI va mas alla del expediente tradicional, rompiendo con la logica lineal de tramitacion, habilitando flujos simultaneos, colaborativos y dinamicos entre multiples sectores.
 
-!!! info "Concepto Clave"
-    Un expediente no es solo una carpeta de documentos. Es un **contenedor inteligente** que gestiona flujos de trabajo, permisos, trazabilidad y colaboracion inter-areas en una unica vista.
-
 ---
 
 ## Propuesta de Valor
